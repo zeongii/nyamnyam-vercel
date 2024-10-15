@@ -52,7 +52,6 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
     const [reportReason, setReportReason] = useState<string>("");
     const router = useRouter();
     const currentUserId = nookies.get().userId;
-    const nickname = localStorage.getItem('nickname') || '';
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
 

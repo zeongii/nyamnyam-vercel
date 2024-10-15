@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/notice/details/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/notice/details/[id]/page.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,7 +54,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "release0.08",
+    "git-widget-placeholder": "nyamnyam-post",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/bitcamp/team/release/nyamnyam-front",
@@ -86,8 +84,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.15989.150" />
-        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-IU-241.15989.150" />
+        <option value="bundled-jdk-9823dce3aa75-b114ca120d71-intellij.indexing.shared.core-IU-242.20224.419" />
+        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-IU-242.20224.419" />
       </set>
     </attachedChunks>
   </component>
@@ -135,6 +133,7 @@
       <workItem from="1728904203893" duration="5029000" />
       <workItem from="1728952929892" duration="4347000" />
       <workItem from="1728969248517" duration="2873000" />
+      <workItem from="1728989726173" duration="208000" />
     </task>
     <servers />
   </component>
