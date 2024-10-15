@@ -23,6 +23,7 @@ import Account from "../../user/account/page";
 import PostOptions from "@/app/components/PostOptions";
 import { postService } from "@/app/service/post/post.service";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function TodayPost() {
     const [todayPosts, setTodayPosts] = useState<PostModel[]>([]);
@@ -32,36 +33,39 @@ export default function TodayPost() {
     const [imgDetails, setImgDetails] = useState<{ postId: number; url: string }[]>([]);
     const [replyToggles, setReplyToggles] = useState<{ [key: number]: boolean }>({});
     const [replies, setReplies] = useState<{ [key: number]: ReplyModel[] }>({});
-    const [likedPost, setLikedPosts] = useState<number[]>([]);
+    const [likedPost, setLikedPosts] = useState<number[]>([]); 
     const [likeCount, setLikeCounts] = useState<{ [key: number]: number }>({});
     const [isOpen, setIsOpen] = useState(false);
     const [isUserOpen, setIsUserOpen] = useState(false);
     const [reportingPostId, setReportingPostId] = useState<number | null>(null);
     const [reportReason, setReportReason] = useState<string>("");
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    //const queryClient = useQueryClient();
     const currentUserId = nookies.get().userId;
     const router = useRouter();
 
+    const fetchData = async () => {
+        try {
+            const todayData = await fetchCurrentPost();  // 서버에서 오늘의 리뷰 가져오기
+    
+            const postWithDetails = await Promise.all(
+                todayData.map(async (post) => {
+                    const restaurant = await fetchRestaurantService(post.restaurantId);
+                    return {
+                        ...post,  
+                        restaurantName: restaurant.name, 
+                        restaurantId: restaurant.id 
+                    };
+                })
+            );
+    
+            setTodayPosts(postWithDetails); 
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+        }
+    };
+    
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const todayData = await fetchCurrentPost();
-
-                const postWithRestaurantDetails = await Promise.all(
-                    todayData.map(async (post) => {
-                        const restaurant = await fetchRestaurantService(post.restaurantId);
-                        return {
-                            ...post,
-                            restaurantName: restaurant.name,
-                            restaurantId: restaurant.id
-                        };
-                    })
-                );
-                setTodayPosts(postWithRestaurantDetails);
-            } catch (error) {
-                console.error("Error fetching data: ", error);
-            }
-        };
         fetchData();
     }, []);
 
@@ -76,7 +80,7 @@ export default function TodayPost() {
         }));
     };
 
-    // 좋아요 & 취소 & count
+     // 좋아요 & 취소 & count
     const handleLike = async (postId: number, postUserId: string) => {
         if (postUserId === currentUserId) {
             window.alert("본인의 리뷰에는 좋아요를 누를 수 없어요.");
@@ -93,6 +97,7 @@ export default function TodayPost() {
             }))
         }
     };
+
 
     const openModal = (imageURL: string) => {
         setCurrentImg(imageURL);
@@ -133,7 +138,7 @@ export default function TodayPost() {
                 setImgDetails(updatedDetails);
 
                 setAllImages(updatedDetails.map((detail) => detail.url));
-                
+
                 router.push(`/restaurant/${restaurantId}`);
             }
         }
@@ -288,33 +293,33 @@ export default function TodayPost() {
                                         />
                                     </div>
                                     {reportingPostId === post.id && (
-                                            <div className="mt-4">
-                                                <form onSubmit={handleReportSubmit} className="flex flex-col">
-                                                    <label className="text-gray-700 mb-2">신고 사유를 선택하세요:</label>
-                                                    <select
-                                                        value={reportReason}
-                                                        onChange={(e) => setReportReason(e.target.value)}
-                                                        className="border rounded p-2 mb-4"
-                                                    >
-                                                        <option value="">선택하세요</option>
-                                                        {reportReasons.map((reason, index) => (
-                                                            <option key={index} value={reason}>{reason}</option>
-                                                        ))}
-                                                    </select>
-                                                    <div className='flex justify-end mt-4'>
-                                                        <button type="submit" className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded">
-                                                            신고하기
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setReportingPostId(null)}
-                                                            className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded">
-                                                            취소
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        )}
+                                        <div className="mt-4">
+                                            <form onSubmit={handleReportSubmit} className="flex flex-col">
+                                                <label className="text-gray-700 mb-2">신고 사유를 선택하세요:</label>
+                                                <select
+                                                    value={reportReason}
+                                                    onChange={(e) => setReportReason(e.target.value)}
+                                                    className="border rounded p-2 mb-4"
+                                                >
+                                                    <option value="">선택하세요</option>
+                                                    {reportReasons.map((reason, index) => (
+                                                        <option key={index} value={reason}>{reason}</option>
+                                                    ))}
+                                                </select>
+                                                <div className='flex justify-end mt-4'>
+                                                    <button type="submit" className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded">
+                                                        신고하기
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setReportingPostId(null)}
+                                                        className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded">
+                                                        취소
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    )}
 
                                     <div className="flex items-center space-x-6">
                                         <div className="flex items-center">

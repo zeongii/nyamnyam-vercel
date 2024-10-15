@@ -2,15 +2,26 @@
 import './globals.css';
 import StoreProvider from './StoreProvider';
 import { useSearchContext } from './components/SearchContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import TabFeatures from './(page)/restaurant/page';
 import { useRouter } from 'next/navigation';
 import Home from './(page)/home/page';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import TodayPost from './(page)/post/today/page';
 
 const Page = () => {
     const { searchTerm } = useSearchContext();
     const [isTabVisible, setIsTabVisible] = useState(true);
     const router = useRouter();
+
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                refetchOnWindowFocus: true, 
+                staleTime: 0, 
+            },
+        },
+    });
 
     useEffect(() => {
         if (searchTerm) {
@@ -23,9 +34,12 @@ const Page = () => {
     }, [searchTerm]);
 
     return (
-        <StoreProvider>
-            {isTabVisible ? <TabFeatures start={0} limit={10} /> : <Home />}
-        </StoreProvider>
+        <QueryClientProvider client={queryClient}>
+            <StoreProvider>
+                {isTabVisible ? <TabFeatures start={0} limit={10} /> : <Home />}
+                <TodayPost />
+            </StoreProvider>
+        </QueryClientProvider>
     );
 };
 
