@@ -217,7 +217,7 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
     // 좋아요 & 취소 & count
     const handleLike = async (postId: number, postUserId: string) => {
         if (postUserId === currentUserId) {
-            window.alert("본인의 리뷰에는 좋아요를 누를 수 없어요.");
+            window.alert("본인의 리뷰에는 좋아요를 누를 수 없습니다.");
             return;
         }
 
