@@ -1,5 +1,10 @@
 import { User } from "src/app/model/user.model";
-const token =localStorage.getItem('token')
+let token: string | null = null;
+
+if (typeof window !== "undefined") {
+    token = localStorage.getItem('token');
+}
+
 export const fetchUserExists = async (id: string): Promise<boolean> => {
     const response = await fetch(`http://localhost:8081/api/user/existsById?id=${id}`,{
         method: "GET",

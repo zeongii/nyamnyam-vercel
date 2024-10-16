@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/post/[restaurantId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/post/[restaurantId]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/receipt/insertReceipt/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/receipt/insertReceipt/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/receipt/receiptRestaurant/[restaurantId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/receipt/receiptRestaurant/[restaurantId]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/restaurant/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/restaurant/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/account/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/follow/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/follow/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/userList/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/userList/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/follow/follow.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/follow/follow.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/components/Modal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/Modal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/model/follow.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/model/follow.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/service/follow/follow.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/service/follow/follow.service.ts" afterDir="false" />
-    </list>
+    <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,7 +20,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="nyamnyam-user" />
+        <entry key="$PROJECT_DIR$" value="release0.08" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
