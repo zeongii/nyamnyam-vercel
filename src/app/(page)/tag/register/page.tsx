@@ -12,10 +12,15 @@ export default function TagRegister() {
   const [formData, setFormData] = useState<TagModel>(initialTag);
   const allTags: TagModel[] = Object.values(tags).flat();
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTag();
     fetchTagCategory();
+
+    const storedRole = localStorage.getItem('role');
+    setRole(storedRole);
+
 
   }, []);
 
@@ -53,7 +58,6 @@ export default function TagRegister() {
     });
   };
 
-  const role = localStorage.getItem('role');
 
   if (role !== 'ADMIN') {
     return (

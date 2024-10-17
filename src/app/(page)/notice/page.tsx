@@ -13,8 +13,7 @@ export default function ShowNotice() {
     const { searchTerm } = useSearchContext();
     const router = useRouter();
     const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const role = localStorage.getItem('role') || null;
-
+    const [role, setRole] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedNoticeIds, setSelectedNoticeIds] = useState<number[]>([]); // 선택된 공지사항 ID 배열 상태
 
@@ -26,6 +25,8 @@ export default function ShowNotice() {
             } catch (error) {
                 console.error("공지사항을 불러오는 데 오류가 발생했습니다:", error);
             }
+            const role = localStorage.getItem('role') || null;
+            setRole(role)
         };
 
         loadNotices(); // 함수 호출

@@ -7,7 +7,6 @@ import { User } from "@/app/model/user.model";
 import { FollowModel } from "@/app/model/follow.model";
 import Account from "@/app/(page)/user/account/page";
 import Modal from "@/app/components/Modal";
-import {follow} from "@/app/api/follow/follow.api";
 
 export default function FollowList() {
     const [activeTab, setActiveTab] = useState(0);

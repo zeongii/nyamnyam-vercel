@@ -17,7 +17,7 @@ interface Props {
     limit: number;
 }
 
-const TabFeatures: React.FC<Props> = ({ start, limit }) => {
+const TabFeatures: React.FC<Partial<Props>> = ({ start, limit }) => {
     const [restaurantsByMeeting, setRestaurantsByMeeting] = useState<RestaurantModel[]>([]);
     const [restaurantsByDate, setRestaurantsByDate] = useState<RestaurantModel[]>([]);
     const [restaurantsByFriend, setRestaurantsByFriend] = useState<RestaurantModel[]>([]);

@@ -7,7 +7,7 @@ interface ShowRestaurantProps {
     restaurantId: number;
 }
 
-const ShowRestaurant: React.FC<ShowRestaurantProps> = ({ restaurantId }) => {
+const ShowRestaurant: React.FC<Partial<ShowRestaurantProps>> = ({ restaurantId }) => {
     const [restaurantModel, setRestaurantModel] = useState<RestaurantModel | null>(null);
     const router = useRouter();
 

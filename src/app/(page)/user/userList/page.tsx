@@ -8,10 +8,17 @@ import Account from "@/app/(page)/user/account/page";
 const UserTable = ({ users = [] }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [sortColumn, setSortColumn] = useState('username');
     const [sortDirection, setSortDirection] = useState('asc');
     const itemsPerPage = 10;
+    const [role, setRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedRole = localStorage.getItem('role');
+        setRole(storedRole);
+    }, []);
+
 
     const indexOfLastUser = currentPage * itemsPerPage;
     const indexOfFirstUser = indexOfLastUser - itemsPerPage;
@@ -43,7 +50,6 @@ const UserTable = ({ users = [] }) => {
         }
     };
 
-    const role = localStorage.getItem('role');
 
     if (role !== 'ADMIN') {
         return (

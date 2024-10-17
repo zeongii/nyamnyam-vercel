@@ -19,14 +19,11 @@ import {
 } from "chart.js";
 import styles from "src/css/mypage.module.css";
 import {Bar} from "react-chartjs-2";
-import Modal from "src/app/components/Modal";
 import ShowOpinion from "src/app/(page)/admin/showOpinion/page";
 import DashBoard from "src/app/(page)/admin/dashboard/page";
 import {fetchReportCountAll, fetchReportList} from "src/app/service/report/report.service";
 import {ReportModel} from "src/app/model/report.model";
 import UserList from "@/app/(page)/user/userList/page";
-import { useSearchContext } from "@/app/components/SearchContext";
-import { useRouter } from "next/navigation";
 import {fetchAllUsers} from "@/app/api/user/user.api";
 import {User} from "@/app/model/user.model";
 import {PostModel} from "@/app/model/post.model";
@@ -37,12 +34,13 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, ArcElement, CategoryScale, 
 export default function AdminDash() {
     const [count, setCount] = useState<CountItem[]>([]);
     const [activeTab, setActiveTab] = useState<string | undefined>('user')
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [reportCountList, setReportCountList] = useState<ReportCountModel[]>([]);
     const [reportList, setReportList] = useState<ReportModel[]>([]);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [user, setUser] = useState<User[]>([]);
     const [todayPost, setTodayPost] = useState<PostModel[]>([]);
+    const [role, setRole] = useState<string | null>(null);
+
 
 
     const handleRowClick = (index: number) => {
@@ -65,12 +63,20 @@ export default function AdminDash() {
             setUser(userData);
 
             const todayData = await fetchCurrentPost();
-            setTodayPost(todayData)
+            setTodayPost(todayData);
+
+            const storedRole = localStorage.getItem('role');
+            if (storedRole) {
+
+
+                setRole(storedRole);
+            }
 
         };
-        list();
 
+        list();
     }, []);
+
 
 
     const countData = {
@@ -89,7 +95,7 @@ export default function AdminDash() {
     const totalUser = user.length;
     const totalTodayPost = todayPost.length;
 
-    const role = localStorage.getItem('role');
+
 
     if (role !== 'ADMIN') {
         return (

@@ -1,9 +1,7 @@
 import { User } from "src/app/model/user.model";
-//const token =localStorage.getItem('token')
 let token: string | null = null;
 
 if (typeof window !== "undefined") {
-    // 브라우저 환경에서만 localStorage 접근
     token = localStorage.getItem('token');
 }
 export const fetchUserExists = async (id: string): Promise<boolean> => {

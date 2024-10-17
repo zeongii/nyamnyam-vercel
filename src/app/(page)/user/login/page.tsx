@@ -1,12 +1,11 @@
-"use client";
+"use client"
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
-import * as Icon from "@phosphor-icons/react/dist/ssr";
 import { jwtDecode } from 'jwt-decode';
 import nookies from 'nookies';
-
-import {authenticateUser} from "@/app/service/user/user.service";
+import * as Icon from "@phosphor-icons/react/dist/ssr";
+import { authenticateUser } from "@/app/service/user/user.service";
 
 interface DecodedToken {
     sub: string;
@@ -22,32 +21,36 @@ export default function Home() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-
+    const [token, setToken] = useState<string | null>(null);
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             const token = await authenticateUser(username, password);
-
-
-            const decoded: DecodedToken = jwtDecode<DecodedToken>(token);
-
-            nookies.set(null, 'userId', decoded.sub, { path: '/' });
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('nickname', decoded.nickname);
-            localStorage.setItem('username', decoded.username);
-            localStorage.setItem('role', decoded.role);
-            localStorage.setItem('score', String(decoded.score));
-            
-
-            router.push("/");
+            setToken(token);
         } catch (error) {
             console.error('Login failed:', error);
             setErrorMessage('Invalid username or password');
         }
     };
 
+    useEffect(() => {
+        if (token) {
+            const decoded: DecodedToken = jwtDecode<DecodedToken>(token);
+            nookies.set(null, 'token', token, { path: '/' });
+
+            // 클라이언트 사이드에서만 localStorage 접근
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('userId', decoded.sub);
+                localStorage.setItem('nickname', decoded.nickname);
+                localStorage.setItem('username', decoded.username);
+                localStorage.setItem('role', decoded.role);
+                localStorage.setItem('score', String(decoded.score));
+            }
+
+            router.push("/");
+        }
+    }, [token, router]);
 
     return (
         <div className="login-block md:py-20 py-10 mt-10" style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: '#f9f9f9' }}>
@@ -57,15 +60,28 @@ export default function Home() {
                         <div className="heading4 text-xl text-center">로그인</div>
                         <form className="md:mt-7 mt-4" onSubmit={handleLogin}>
                             <div className="username">
-                                <input className="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username"
-                                       type="username" placeholder="username" required
-                                       value={username} onChange={(e) => setUsername(e.target.value)} />
+                                <input
+                                    className="border-line px-4 pt-3 pb-3 w-full rounded-lg"
+                                    id="username"
+                                    type="text"
+                                    placeholder="username"
+                                    required
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                />
                             </div>
                             <div className="pass mt-5">
-                                <input className="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="password"
-                                       type="password" placeholder="Password *" required
-                                       value={password} onChange={(e) => setPassword(e.target.value)} />
+                                <input
+                                    className="border-line px-4 pt-3 pb-3 w-full rounded-lg"
+                                    id="password"
+                                    type="password"
+                                    placeholder="Password *"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
                             </div>
+                            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
                             <div className="flex items-center justify-between mt-5">
                                 <div className='flex items-center'>
                                     <div className="block-input">
@@ -97,55 +113,3 @@ export default function Home() {
         </div>
     );
 }
-
-
-
-// <div className="flex items-center justify-center h-screen">
-//     <div className="w-full max-w-xs">
-//         <form onSubmit={handleLogin} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-//             <h2 className="text-center text-2xl mb-4">Login</h2>
-//             {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-//             <div className="mb-4">
-//                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-//                     Username
-//                 </label>
-//                 <input
-//                     id="username"
-//                     type="text"
-//                     placeholder="Enter your username"
-//                     value={username}
-//                     onChange={(e) => setUsername(e.target.value)}
-//                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-//                 />
-//             </div>
-//             <div className="mb-6">
-//                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-//                     Password
-//                 </label>
-//                 <input
-//                     id="password"
-//                     type="password"
-//                     placeholder="Enter your password"
-//                     value={password}
-//                     onChange={(e) => setPassword(e.target.value)}
-//                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-//                 />
-//             </div>
-//             <div className="flex items-center justify-between">
-//                 <button
-//                     type="submit"
-//                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-//                 >
-//                     Login
-//                 </button>
-//                 <button
-//                     type="button" // form submission이 아닌 버튼 클릭으로 처리
-//                     onClick={handleRegister}
-//                     className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2"
-//                 >
-//                     Register
-//                 </button>
-//             </div>
-//         </form>
-//     </div>
-// </div>

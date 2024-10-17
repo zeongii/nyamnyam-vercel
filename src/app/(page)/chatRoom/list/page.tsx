@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {ChatRoomModel} from "@/app/model/chatRoom.model";
 
 
 export default function Home1() {
