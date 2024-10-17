@@ -30,20 +30,21 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
     const userId = cookies.userId;
 
     useEffect(() => {
-
-        const loadRestaurant = async () => {
-            try {
-                const restaurantData = await fetchRestaurantOne(userId);
-                console.log(restaurantData);
-                setModalRestaurant(restaurantData);
-                setIsModalOpen(true);
-            } catch (error) {
-                console.error("Error fetching restaurant:", error);
-                setIsModalOpen(false);
+        if (userId !== undefined) {
+            const loadRestaurant = async () => {
+                try {
+                    const restaurantData = await fetchRestaurantOne(userId);
+                    console.log(restaurantData);
+                    setModalRestaurant(restaurantData);
+                    setIsModalOpen(true);
+                } catch (error) {
+                    console.error("Error fetching restaurant:", error);
+                    setIsModalOpen(false);
+                }
             }
-        };
 
-        loadRestaurant();
+            loadRestaurant();
+        }
     }, []);
 
     
@@ -66,8 +67,6 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
                 console.error('Error fetching restaurants by tag:', error);
             }
         };
-
-        console.log(userId);
         fetchRestaurants();
     }, []);
 

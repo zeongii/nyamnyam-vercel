@@ -54,7 +54,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "nyamnyam-post",
+    "git-widget-placeholder": "release0.08",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/bitcamp/team/release/nyamnyam-front",
@@ -64,7 +64,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "yarn",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "ts.external.directory.path": "C:\\Users\\USER\\Documents\\nyamnyam\\nyamnyam-front\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "C:\\Users\\bitcamp\\team\\release\\nyamnyam-front0.08\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -133,7 +133,7 @@
       <workItem from="1728904203893" duration="5029000" />
       <workItem from="1728952929892" duration="4347000" />
       <workItem from="1728969248517" duration="2873000" />
-      <workItem from="1728989726173" duration="208000" />
+      <workItem from="1728989962295" duration="171000" />
     </task>
     <servers />
   </component>

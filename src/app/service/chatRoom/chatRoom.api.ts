@@ -11,8 +11,6 @@ export async function insertChatRoom(chatRoom: ChatRoomModel): Promise<any | { s
       body: JSON.stringify(chatRoom)
     });
 
-    console.log(chatRoom);
-
     if (!response.ok) {
       const errorData = await response.json(); // 오류 메시지 확인
       console.error('Error response:', errorData);

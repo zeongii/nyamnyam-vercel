@@ -28,28 +28,18 @@ export default function Home1() {
   const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
   const [user, setUser] = useState(null);
   const [chatRoomName, setChatRoomName] = useState<string>(""); // 채팅방 이름
-  const [participantNames, setParticipantNames] = useState<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        return [parsedUser.nickname];
-      }
-    }
-    return [];
-  });
   const [newParticipantName, setNewParticipantName] = useState<string>(""); // 입력받은 참가자 이름
   const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setSender(parsedUser.nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
-      fetchData(parsedUser.nickname);
+    const nickname = localStorage.getItem('nickname')
+    if (nickname) {
+      setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
+      fetchData(nickname);
     }
+
   }, []);
+
 
   const fetchData = async (nickname: string) => {
     if (!nickname) return;
@@ -218,36 +208,6 @@ export default function Home1() {
 
   //===========================================여기 까지 serviceInsertReply,api 끝!!!!=============================================
 
-  const handleCreateChatRoom = async (e: React.FormEvent) => {
-    e.preventDefault(); // 페이지 새로고침 방지
-
-    // ChatRoom 객체 생성
-    const newChatRoom: any = {
-      name: chatRoomName, // 입력된 채팅방 이름
-      participants: [...participantNames, newParticipantName.trim()], // 초기 참가자 목록에 입력된 참가자 추가
-    };
-
-    // 참가자 목록 체크
-    const participantsList = newChatRoom.participants.length > 0
-      ? newChatRoom.participants.join(", ")
-      : "참가자가 없습니다"; // 참가자가 없을 경우 기본 메시지
-
-    const result = await insertChatRoom(newChatRoom);
-
-    if (result.status === 200) {
-      alert("채팅방이 성공적으로 생성되었습니다.");
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        fetchData(parsedUser.nickname); // user.nickname으로 파라미터 전달
-      }
-    }
-
-    // 채팅방 이름과 참가자 목록 초기화
-    setChatRoomName(""); // 채팅방 이름 초기화
-    setNewParticipantName(""); // 입력 필드 초기화
-  };
-
   const handleCheck = (roomId: string) => {
     // 선택된 채팅방 ID가 이미 배열에 존재하면 제거, 없으면 추가
     setSelectChatRooms((prevSelectedRooms) =>
@@ -282,27 +242,6 @@ export default function Home1() {
         <h3 className="uk-text-lead">Chats</h3>
 
         <div className="chat-room-create">
-          <form onSubmit={handleCreateChatRoom}>
-            <div>
-              <label>채팅방 이름: </label>
-              <input
-                type="text"
-                value={chatRoomName}
-                onChange={(e) => setChatRoomName(e.target.value)}
-                placeholder="채팅방 이름을 입력하세요"
-              />
-            </div>
-            <div>
-              <label>참가자 닉네임: </label>
-              <input
-                type="text"
-                value={newParticipantName}
-                onChange={(e) => setNewParticipantName(e.target.value)}
-                placeholder="참가자 닉네임을 입력하세요"
-              />
-            </div>
-            <button type="submit">채팅방 생성</button>
-          </form>
           <div style={{ marginBottom: '20px' }}>
             <button
               type="button"
@@ -339,53 +278,66 @@ export default function Home1() {
                 </div>
                 <div className="chat-user-list__body">
                   <ul>
-                    {filteredChatRooms.map((room) => (
-                      <li key={room.id}>
-                        <div className="user-item --active">
-                          <div className="user-item__avatar">
-                            <Image src="/assets/img/user-list-1.png" alt="user" width={40} height={40} />
-                          </div>
-                          <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                            <a
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (room && room.id) {
-                                  setSelectedChatRoomId(room.id);
-                                }
-                              }}
-                              style={{ textDecoration: 'none', color: 'inherit', flexGrow: 2, marginRight: '10px' }}
-                            >
-                              <div className="user-item__name">
-                                {room.name}
+                    {filteredChatRooms.map((room) => {
+                      const currentUserNickname = "kidon"; // 로그인한 유저의 닉네임
+
+                      // 로그인한 사용자 닉네임을 제외한 참가자 목록 생성
+                      const otherParticipants = room.participants.filter(participant => participant !== currentUserNickname);
+
+                      // 참가자 목록을 문자열로 변환하여 출력
+                      const otherParticipantsStr = otherParticipants.length > 0 ? otherParticipants.join(', ') : "No Participants";
+
+                      return (
+                        <li key={room.id}>
+                          <div className="user-item --active">
+                            <div className="user-item__avatar">
+                              <Image src="/assets/img/user-list-1.png" alt="user" width={40} height={40} />
+                            </div>
+                            <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                              <a
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (room && room.id) {
+                                    setSelectedChatRoomId(room.id);
+                                  }
+                                }}
+                                style={{ textDecoration: 'none', color: 'inherit', flexGrow: 2, marginRight: '10px' }}
+                              >
+                                <div className="user-item__name">
+                                  {/* 참가자 이름 출력 */}
+                                  {`${otherParticipantsStr} ${room.name}`}
+                                </div>
+                              </a>
+                              <div style={{ flexGrow: 1, flexShrink: 1, textAlign: 'right', marginRight: '10px', maxWidth: '150px' }}>
+                                {room.participants && room.participants.length > 0 ? (
+                                  <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                                    {room.participants.map((participant: string, index: number) => (
+                                      <li key={index} style={{ marginLeft: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: '100%', width: 'auto' }}>
+                                        {participant || "No Nickname"}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  "No Participants"
+                                )}
                               </div>
-                            </a>
-                            <div style={{ flexGrow: 1, flexShrink: 1, textAlign: 'right', marginRight: '10px', maxWidth: '150px' }}>
-                              {room.participants && room.participants.length > 0 ? (
-                                <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
-                                  {room.participants.map((participant: string, index: number) => (
-                                    <li key={index} style={{ marginLeft: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: '100%', width: 'auto' }}>
-                                      {participant || "No Nickname"}
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                "No Participants"
-                              )}
+                            </div>
+                            <div className="user-item__info" style={{ marginLeft: 'auto' }}>
+                              <input
+                                type="checkbox"
+                                checked={selectChatRooms.includes(room.id)}
+                                onChange={(e) => handleCheck(room.id)}
+                              />
+                              {/* 안 읽은 메시지 수 표시 */}
+                              <span style={{ marginLeft: '5px', color: 'red' }}>
+                                {room.unreadCount < 0 ? 0 : room.unreadCount} unread
+                              </span>
                             </div>
                           </div>
-                          <div className="user-item__info" style={{ marginLeft: 'auto' }}>
-                            <input
-                              type="checkbox"
-                              checked={selectChatRooms.includes(room.id)}
-                              onChange={(e) => handleCheck(room.id)}
-                            />
-                            {/* 안 읽은 메시지 수 표시 */}
-                            <span style={{ marginLeft: '5px', color: 'red' }}>{room.unreadCount} unread</span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>
@@ -463,7 +415,7 @@ export default function Home1() {
                       >
                         Send
                       </button>
-                    </form>  
+                    </form>
                   </div>
                 </>
               ) : null}
