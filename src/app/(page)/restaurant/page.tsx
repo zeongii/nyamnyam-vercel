@@ -47,7 +47,7 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
         }
     }, []);
 
-    
+
 
     useEffect(() => {
         const fetchRestaurants = async () => {
@@ -103,7 +103,7 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
                         {restaurants.slice(start, limit).map((restaurant) => (
                             <SwiperSlide key={restaurant.id}>
                                 {/* <Link href={`/restaurant/${restaurant.id}`}> */}
-                                    <Product data={restaurant} type='grid' />
+                                <Product data={restaurant} type='grid' />
                                 {/* </Link> */}
                             </SwiperSlide>
                         ))}
