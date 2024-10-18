@@ -8,7 +8,7 @@ if (typeof window !== "undefined") {
 
 // 챗룸 출력(해당 유저가 참여한으로 수정 필요)
 export const fetchChatRooms = async (nickname: any) => {
-  
+  console.log(token)
   const response = await fetch(`http://localhost:8081/api/chatRoom/findAll/${nickname}`, {
     method: 'GET',
     headers: {
