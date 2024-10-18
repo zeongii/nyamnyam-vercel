@@ -9,6 +9,8 @@ export default function ShowNotice() {
     const [notice, setNotice] = useState<NoticeModel | null>(null);
     const router = useRouter();
     const {id} = useParams();
+    const [role, setRole] = useState<string | null>(null);
+
 
 
 
@@ -23,12 +25,16 @@ export default function ShowNotice() {
             }
         };
 
+
+        const storedRole = localStorage.getItem('role');
+        setRole(storedRole);
+
+
         if (id) {
             fetchNotice(Number(id));
         }
     }, [id]);
 
-    const role = localStorage.getItem('role');
 
     return (
         <main className="flex min-h-screen flex-col items-center p-6 bg-white-100">

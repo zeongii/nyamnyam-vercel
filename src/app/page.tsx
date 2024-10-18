@@ -37,7 +37,6 @@ const Page = () => {
         <QueryClientProvider client={queryClient}>
             <StoreProvider>
                 {isTabVisible ? <TabFeatures start={0} limit={10} /> : <Home />}
-                <TodayPost />
             </StoreProvider>
         </QueryClientProvider>
     );

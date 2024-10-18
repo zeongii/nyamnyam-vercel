@@ -14,7 +14,8 @@ import Image from 'next/image'
 
 
 export default function Restaurant() {
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
+    const restaurantId = id ? Number(id) : null;
     const [restaurant, setRestaurant] = useState<RestaurantModel | null>(null);
     const [loading, setLoading] = useState(true);
     const [openPopupImg, setOpenPopupImg] = useState(false);
@@ -199,7 +200,7 @@ export default function Restaurant() {
                             <div id="map" className="w-full h-full rounded-lg"></div>
                         </div>
                         <div style={{ borderTop: '1px solid #e0e0e0' }} className='my-30'>
-                            <PostList restaurantId={Number(id)} />
+                            <PostList restaurantId={restaurantId} />
                         </div>
                     </div>
             </div>
