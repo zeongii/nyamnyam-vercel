@@ -20,7 +20,7 @@ const showArea = async (): Promise<Area[]> => {
         return resp.data;
     } catch (error) {
         console.error("Failed to fetch user counts");
-        throw new Error("Failed to fetch user counts");
+        throw new Error("Failed to fetch countAreaList");
     }
 };
 
@@ -30,7 +30,7 @@ const showRankRestaurant = async (): Promise<RestaurantList[]> => {
         return resp.data;
     } catch (error) {
         console.error("Failed to fetch user counts");
-        throw new Error("Failed to fetch user counts");
+        throw new Error("Failed to fetch countPostList");
     }
 }
 
@@ -39,8 +39,8 @@ const showRestaurant = async (id: string): Promise<RestaurantModel> => {
         const response = await strategy.GET(`${api.admin}/randomByUserId/${id}`);
         return response.data; // 데이터 반환
     } catch (error) {
-        console.error("Failed to fetch notice details:", error);
-        throw new Error("Failed to fetch notice details");
+        console.error(error);
+        throw new Error("Failed to fetch get random");
     }
 }
 
@@ -51,7 +51,7 @@ const receiptList = async (): Promise<CountCost[]> => {
         return resp.data;
     } catch (error) {
         console.error("Failed to fetch user counts");
-        throw new Error("Failed to fetch user counts");
+        throw new Error("Failed to fetch receiptCount");
     }
 
 
@@ -63,7 +63,7 @@ const upvoteRestaurant = async (): Promise<RestaurantList[]> => {
         return resp.data;
     } catch (error) {
         console.error("Failed to fetch user counts");
-        throw new Error("Failed to fetch user counts");
+        throw new Error("Failed to fetch upvoteRestaurant");
     }
 
 
@@ -75,7 +75,7 @@ const typeCount = async (id : string): Promise<CountItem[]> => {
         return resp.data;
     } catch (error) {
         console.error("Failed to fetch user counts");
-        throw new Error("Failed to fetch user counts");
+        throw new Error("Failed to fetch typeLists");
     }
 };
 
@@ -85,7 +85,7 @@ const areaCount = async (id : string): Promise<Area[]> => {
         return resp.data;
     } catch (error) {
         console.error("Failed to fetch user counts");
-        throw new Error("Failed to fetch user counts");
+        throw new Error("Failed to fetch userAreaList");
     }
 };
 
@@ -95,7 +95,7 @@ const currentPost = async (): Promise<PostModel[]> => {
         return resp.data;
     } catch (error) {
         console.error("Failed to fetch user counts");
-        throw new Error("Failed to fetch user counts");
+        throw new Error("Failed to fetch todayPost");
     }
 };
 

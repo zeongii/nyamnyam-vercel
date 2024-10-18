@@ -8,60 +8,52 @@ import { fetchDeleteFollow, fetchIsFollow, fetchRegisterFollow } from "@/app/ser
 import { FollowModel } from "@/app/model/follow.model";
 import { insertChatRoom } from '@/app/service/chatRoom/chatRoom.api';
 import { useRouter } from 'next/navigation';
+import {fetchUserById} from "@/app/api/user/user.api";
 
 interface AccountProps {
-    user: User;
+    selectUser: User;
 }
 
-interface Users {
-    nickname: string;
-    username: string;
-    role: string;
-    score: string;
-}
 
-export default function Account(user: Partial<AccountProps>) {
-    const [users, setUsers] = useState<Users | null>(null);
+export default function Account(selectUser: Partial<AccountProps>) {
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
+    const [user, setUser] = useState<User | null>(null);
+
     const cookie = nookies.get();
     const userId = cookie.userId;
     const router = useRouter();
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const myInfo = await fetchUserById(userId);
+                setUser(myInfo);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
 
-        if (userId && user.user) {
-            const username = localStorage.getItem('username');
-            const nickname = localStorage.getItem('nickname');
-            const role = localStorage.getItem('role');
-            const score = localStorage.getItem('score')
-
-            if (username && nickname && role && score) {
-                const storedUser = {
-                    username,
-                    nickname,
-                    role,
-                    score
-                };
-                setUsers(storedUser);
+            if (selectUser.selectUser) {
+                setSelectedUser(selectUser.selectUser);
             }
 
             const checkFollowStatus = async () => {
-                const followingUser = user?.user.nickname;
-                const result = await fetchIsFollow(followingUser, nickname);
+                const followingUser = selectUser?.selectUser.nickname;
+                const result = await fetchIsFollow(followingUser, user.nickname);
                 setIsFollowing(result);
             };
 
-            checkFollowStatus();
-        }
+            await checkFollowStatus();
+        };
 
-
-    }, [userId, user])
+        fetchData();
+    }, [selectUser, userId]);
 
     const handleFollow = async () => {
         const followModel: FollowModel = {
             id: 0,
-            follower: user?.user.nickname,
-            following: users.nickname,
+            follower: selectUser?.selectUser.nickname,
+            following: user.nickname,
         };
 
         try {
@@ -74,8 +66,8 @@ export default function Account(user: Partial<AccountProps>) {
 
     const handleUnfollow = async () => {
 
-        const follower = user?.user.nickname
-        const following = users.nickname
+        const follower = selectUser?.selectUser.nickname
+        const following = user.nickname
 
 
         try {
@@ -92,7 +84,7 @@ export default function Account(user: Partial<AccountProps>) {
         // ChatRoom 객체 생성
         const newChatRoom: any = {
             name: "님과의 채팅방", // 입력된 채팅방 이름
-            participants: [users.nickname, user.user.nickname], // 초기 참가자 목록에 입력된 참가자 추가
+            participants: [selectedUser.nickname, selectUser.selectUser.nickname], // 초기 참가자 목록에 입력된 참가자 추가
         };
 
         // 참가자 목록 체크
@@ -127,9 +119,9 @@ export default function Account(user: Partial<AccountProps>) {
                             className='md:w-[140px] w-[120px] md:h-[140px] h-[120px] rounded-full'
                         />
                     </div>
-                    <div className="name heading6 mt-4 text-left">{user?.user?.nickname}</div>
+                    <div className="name heading6 mt-4 text-left">{selectUser?.selectUser?.nickname}</div>
                     <div className="mail heading6 font-normal normal-case text-secondary mt-1 text-sm text-left">
-                        냠냠온도: {user?.user?.score}
+                        냠냠온도: {selectUser?.selectUser?.score}
                     </div>
                 </div>
                 <div className="menu-tab w-full max-w-none lg:mt-10 mt-6">
@@ -138,7 +130,7 @@ export default function Account(user: Partial<AccountProps>) {
                     </div>
                 </div>
                 {
-                    user.user?.id === userId ? (
+                    selectUser.selectUser?.id === userId ? (
                         <Link href="/user/follow" passHref>
                             <button type="submit"
                                 className="px-4 py-2 bg-[#41B3A3] text-white rounded hover:bg-[#178E7F]">
