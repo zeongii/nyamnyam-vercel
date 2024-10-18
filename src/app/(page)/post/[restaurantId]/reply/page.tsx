@@ -1,10 +1,10 @@
-
+"use client"
 import { ReplyModel } from '@/app/model/reply.model';
 import { replyService } from '@/app/service/reply/reply.service';
 import nookies from 'nookies';
 import { FormEvent, useEffect, useState } from 'react';
 
-const ReplyHandler: React.FC<{ postId: number; initialReplies: ReplyModel[]; currentId: string; isOpen: boolean;}> = ({ postId, initialReplies, currentId, isOpen }) => {
+const ReplyHandler: React.FC<Partial<{ postId: number; initialReplies: ReplyModel[]; currentId: string; isOpen: boolean;}>> = ({ postId, initialReplies, currentId, isOpen }) => {
     if(!isOpen) return null;
 
     const [localReplies, setLocalReplies] = useState<{ [key: number]:  ReplyModel[] }>({});

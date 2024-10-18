@@ -30,7 +30,7 @@ import Account from "@/app/(page)/user/account/page";
 import {getUserById} from "@/app/service/user/user.service";
 import ReplyHandler from './reply/page';
 
-const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
+const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
     const [posts, setPosts] = useState<PostModel[]>([]);
     const [restaurant, setRestaurant] = useState<RestaurantModel | null>(null);
     const [images, setImages] = useState<{ [key: number]: string[] }>({});
@@ -52,6 +52,7 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
     const [reportReason, setReportReason] = useState<string>("");
     const router = useRouter();
     const currentUserId = nookies.get().userId;
+    const nickname = localStorage.getItem('nickname') || '';
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
 
@@ -69,11 +70,11 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
 
     useEffect(() => {
         if (restaurantId) {
-            fetchPosts(Number(restaurantId));
+            fetchPosts(restaurantId);
             fetchRestaurant();
-            fetchImgByRestaurant(Number(restaurantId));
-            fetchRestaurantDetails(Number(restaurantId));
-            fetchTopTags(Number(restaurantId));
+            fetchImgByRestaurant(restaurantId);
+            fetchRestaurantDetails(restaurantId);
+            fetchTopTags(restaurantId);
         }
     }, [restaurantId]);
 
@@ -112,7 +113,7 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
 
     const fetchRestaurant = async () => {
         if (restaurantId) {
-            const data = await fetchRestaurantService(Number(restaurantId));
+            const data = await fetchRestaurantService(restaurantId);
             if (data) setRestaurant(data);
         }
     };
@@ -217,7 +218,7 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
     // 좋아요 & 취소 & count
     const handleLike = async (postId: number, postUserId: string) => {
         if (postUserId === currentUserId) {
-            window.alert("본인의 리뷰에는 좋아요를 누를 수 없습니다.");
+            window.alert("본인의 리뷰에는 좋아요를 누를 수 없어요.");
             return;
         }
 
