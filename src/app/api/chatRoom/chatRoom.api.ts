@@ -58,16 +58,18 @@ export const fetchChatRoomById = async (chatRoomId: any) => {
 
 
 // api/chatRoomApi.ts
-export const deleteChatRoomApi = async (chatRoomId: string) => {
-
-  const response = await fetch(`http://localhost:8081/api/chatRoom/deleteById/${chatRoomId}`, {
+export const deleteChatRoomApi = async (chatRoomId: string, nickname: string) => {
+  const response = await fetch(`http://localhost:8081/api/chatRoom/leaveChatRoom/${chatRoomId}/${nickname}`, {
     method: 'DELETE',
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-  },
+    },
   });
+
   if (!response.ok) {
-    throw new Error("채팅방 삭제 실패");
+    throw new Error("채팅방 나가기 실패");
   }
+
+  return await response.json();
 };

@@ -12,6 +12,7 @@ import { ChatModel } from "src/app/model/chat.model";
 import { getNotReadParticipantsCount, getUnreadCount, markMessageAsRead, updateReadBy } from "src/app/api/chat/chat.api";
 import dynamic from "next/dynamic"; // Next.js의 dynamic import 사용
 import React from "react";
+import { ChatRooms } from "@/app/components/ChatRooms";
 
 export default function Home1() {
   const [chatRooms, setChatRooms] = useState<ChatRoomModel[]>([]);
@@ -249,19 +250,6 @@ export default function Home1() {
       </Head>
       <main className="page-main">
         <h3 className="uk-text-lead">Chats</h3>
-
-        <div className="chat-room-create">
-          <div style={{ marginBottom: '20px' }}>
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg"
-            >
-              선택한 채팅방 삭제
-            </button>
-          </div>
-        </div>
-
         <div className="uk-grid uk-grid-small" data-uk-grid>
           <div className="uk-width-1-3@l">
             <div className="chat-user-list">
@@ -352,11 +340,10 @@ export default function Home1() {
                                 >
                                   {room.unreadCount}
                                 </span>
-                                <input
-                                  type="checkbox"
-                                  checked={selectChatRooms.includes(room.id)}
-                                  onChange={(e) => handleCheck(room.id)}
-                                />
+                                <ChatRooms
+                                  chatRoomId={room.id}
+                                  nickname={localStorage.getItem('nickname')}
+                                  />                                
                               </div>
                             </div>
                           </li>
