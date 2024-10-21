@@ -92,14 +92,15 @@ export default function PostRegister() {
       clean: formData.clean,
       service: formData.service,
       tags: tags,
-      restaurantId: formData.restaurantId
+      restaurantId: formData.restaurantId,
+      enabled: 1
     };
     
     const newFormData = new FormData();
 
     newFormData.append("model", new Blob([JSON.stringify(postData)], {type: "application/json"}));
 
-    images.forEach((file) => {
+    images.forEach((file) => {git p
       newFormData.append("files", file);
     })
     try {
