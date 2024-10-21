@@ -17,7 +17,7 @@ interface Props {
     limit: number;
 }
 
-const TabFeatures: React.FC<Props> = ({ start, limit }) => {
+const TabFeatures: React.FC<Partial<Props>> = ({ start, limit }) => {
     const [restaurantsByMeeting, setRestaurantsByMeeting] = useState<RestaurantModel[]>([]);
     const [restaurantsByDate, setRestaurantsByDate] = useState<RestaurantModel[]>([]);
     const [restaurantsByFriend, setRestaurantsByFriend] = useState<RestaurantModel[]>([]);
@@ -34,11 +34,9 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
             const loadRestaurant = async () => {
                 try {
                     const restaurantData = await fetchRestaurantOne(userId);
-                    console.log(restaurantData);
                     setModalRestaurant(restaurantData);
                     setIsModalOpen(true);
                 } catch (error) {
-                    console.error("Error fetching restaurant:", error);
                     setIsModalOpen(false);
                 }
             }
@@ -47,7 +45,7 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
         }
     }, []);
 
-
+    
 
     useEffect(() => {
         const fetchRestaurants = async () => {
@@ -103,7 +101,7 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
                         {restaurants.slice(start, limit).map((restaurant) => (
                             <SwiperSlide key={restaurant.id}>
                                 {/* <Link href={`/restaurant/${restaurant.id}`}> */}
-                                <Product data={restaurant} type='grid' />
+                                    <Product data={restaurant} type='grid' />
                                 {/* </Link> */}
                             </SwiperSlide>
                         ))}
@@ -125,7 +123,7 @@ const TabFeatures: React.FC<Props> = ({ start, limit }) => {
                 {renderSwiper('#친구 모임', restaurantsByFriend, 3)}
             </div>
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                {modalRestaurant ? (
+                {modalRestaurant !== null ? (
                     <div className={"text-center"}>
                         <h5></h5>
                         <h1>오늘 이 음식점 어때요?</h1>

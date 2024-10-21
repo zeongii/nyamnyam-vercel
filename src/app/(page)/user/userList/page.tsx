@@ -1,17 +1,30 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { fetchAllUsers } from "@/app/api/user/user.api";
+import {fetchAllUsers, fetchUserById} from "@/app/api/user/user.api";
 import { User } from "@/app/model/user.model";
 import Modal from "@/app/components/Modal";
 import Account from "@/app/(page)/user/account/page";
+import nookies from "nookies";
 
 const UserTable = ({ users = [] }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [sortColumn, setSortColumn] = useState('username');
     const [sortDirection, setSortDirection] = useState('asc');
     const itemsPerPage = 10;
+    const [user, setUser] = useState<User | null>(null);
+
+    const cookie = nookies.get();
+    const userId = cookie.userId;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const myInfo = await fetchUserById(userId);
+            setUser(myInfo);
+        }
+        fetchData()
+    }, []);
 
     const indexOfLastUser = currentPage * itemsPerPage;
     const indexOfFirstUser = indexOfLastUser - itemsPerPage;
@@ -43,9 +56,8 @@ const UserTable = ({ users = [] }) => {
         }
     };
 
-    const role = localStorage.getItem('role');
 
-    if (role !== 'ADMIN') {
+    if (user?.role !== 'ADMIN') {
         return (
             <div className="unauthorized text-center mt-5">
                 <h2>권한이 없습니다</h2>
@@ -126,7 +138,7 @@ const UserTable = ({ users = [] }) => {
             </div>
 
             <Modal isOpen={isModalOpen} onClose={closeModal}>
-                {selectedUser && <Account user={selectedUser} />}
+                {selectedUser && <Account selectUser={selectedUser} />}
             </Modal>
         </div>
     );

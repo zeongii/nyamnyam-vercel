@@ -19,17 +19,15 @@ import {
 } from "chart.js";
 import styles from "src/css/mypage.module.css";
 import {Bar} from "react-chartjs-2";
-import Modal from "src/app/components/Modal";
 import ShowOpinion from "src/app/(page)/admin/showOpinion/page";
 import DashBoard from "src/app/(page)/admin/dashboard/page";
 import {fetchReportCountAll, fetchReportList} from "src/app/service/report/report.service";
 import {ReportModel} from "src/app/model/report.model";
 import UserList from "@/app/(page)/user/userList/page";
-import { useSearchContext } from "@/app/components/SearchContext";
-import { useRouter } from "next/navigation";
-import {fetchAllUsers} from "@/app/api/user/user.api";
+import {fetchAllUsers, fetchUserById} from "@/app/api/user/user.api";
 import {User} from "@/app/model/user.model";
 import {PostModel} from "@/app/model/post.model";
+import nookies from "nookies";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, ArcElement, CategoryScale, LinearScale, PointElement, LineElement);
 
@@ -37,21 +35,20 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, ArcElement, CategoryScale, 
 export default function AdminDash() {
     const [count, setCount] = useState<CountItem[]>([]);
     const [activeTab, setActiveTab] = useState<string | undefined>('user')
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [reportCountList, setReportCountList] = useState<ReportCountModel[]>([]);
     const [reportList, setReportList] = useState<ReportModel[]>([]);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-    const [user, setUser] = useState<User[]>([]);
+    const [userList, setUserList] = useState<User[]>([]);
     const [todayPost, setTodayPost] = useState<PostModel[]>([]);
+    const [user, setUser] = useState<User | null>(null);
 
 
-    const handleRowClick = (index: number) => {
-        setOpenIndex(openIndex === index ? null : index);
-    };
+    const cookie = nookies.get();
+    const userId = cookie.userId;
 
 
     useEffect(() => {
-        const list = async () => {
+        const fetchData = async () => {
             const countData = await fetchShowCount();
             setCount(countData);
 
@@ -62,15 +59,19 @@ export default function AdminDash() {
             setReportList(listData);
 
             const userData = await fetchAllUsers();
-            setUser(userData);
+            setUserList(userData);
 
             const todayData = await fetchCurrentPost();
-            setTodayPost(todayData)
+            setTodayPost(todayData);
+
+            const myInfo = await fetchUserById(userId);
+            setUser(myInfo);
 
         };
-        list();
 
-    }, []);
+        fetchData();
+    }, [userId]);
+
 
 
     const countData = {
@@ -86,23 +87,21 @@ export default function AdminDash() {
         ],
     };
 
-    const totalUser = user.length;
+    const totalUser = userList.length;
     const totalTodayPost = todayPost.length;
 
-    const role = localStorage.getItem('role');
 
-    if (role !== 'ADMIN') {
-        return (
-            <div className="unauthorized text-center mt-5">
-                <h2>권한이 없습니다</h2>
-                <p>You do not have permission to view this content.</p>
-            </div>
-        );
-    }
+    const handleRowClick = (index: number) => {
+        setOpenIndex(openIndex === index ? null : index);
+    };
+
 
     return (
         <>
-
+            {user?.role !== 'ADMIN' ? (
+                <div className="unauthorized text-center mt-5">
+                </div>
+                ) : (
             <div className="profile-block md:py-20 py-10 md:px-8 px-4 mt-10">
                 <div className="container">
                     <div className="content-main flex gap-y-8 max-md:flex-col w-full">
@@ -283,6 +282,7 @@ export default function AdminDash() {
                     </div>
                 </div>
             </div>
+            )}
         </>
     )
 

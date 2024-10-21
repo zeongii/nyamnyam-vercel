@@ -15,7 +15,7 @@ const toggle = async (id: number, replyToggles: { [key: number]: boolean }) => {
   return { toggled, replies: null };
 };
 
-const submit = async (postId: number, replyContent: string, currentId: string, nickname: string, replyToggles: { [key: number]: boolean }) => {
+const submit = async (postId: number, replyContent: string, currentId: string, nickname: string) => {
   const replyData: ReplyModel = {
     ...initialReply,
     postId: postId,
@@ -28,13 +28,13 @@ const submit = async (postId: number, replyContent: string, currentId: string, n
     const newReply = await reply.insert(replyData);
 
     if(!newReply){
-      return {success: false, toggled: replyToggles, newReply: null};
+      return {success: false, newReply: null};
     }
 
-    return {success: true, toggled: { ...replyToggles, [postId]: true }, newReply, };
+    return {success: true, newReply, };
   } catch (error) {
     console.error("댓글 작성 중 오류 발생:", error);
-    return { success: false, toggled: replyToggles, newReply:null };
+    return { success: false, newReply:null };
   }
 };
 
@@ -56,11 +56,11 @@ const editSave = async (replyId: number, postId: number, updateContent: string, 
   }
 };
 
-export const remove = async (replyId: number, postId: number, replies: { [key: number]: ReplyModel[] }) => {
+export const remove = async (replyId: number, postId: number, localPostReplies: ReplyModel[]) => {
     try {
       await reply.remove(replyId);
 
-      const updateReplies = replies[postId].filter((reply) => reply.id !== replyId);
+      const updateReplies = localPostReplies.filter((reply) => reply.id !== replyId);
 
       return updateReplies;
     } catch (error: any) {

@@ -63,6 +63,7 @@ export const addUser = async (
         enabled: true,
         role: 'user',
         imgId: null,
+        score: 36.5
     };
 
     if (thumbnails.length > 0) {

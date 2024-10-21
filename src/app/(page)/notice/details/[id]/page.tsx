@@ -9,6 +9,8 @@ export default function ShowNotice() {
     const [notice, setNotice] = useState<NoticeModel | null>(null);
     const router = useRouter();
     const {id} = useParams();
+    const [role, setRole] = useState<string | null>(null);
+
 
 
 
@@ -23,21 +25,16 @@ export default function ShowNotice() {
             }
         };
 
+
+        const storedRole = localStorage.getItem('role');
+        setRole(storedRole);
+
+
         if (id) {
             fetchNotice(Number(id));
         }
     }, [id]);
 
-    const role = localStorage.getItem('role');
-
-    if (role !== 'ADMIN') {
-        return (
-            <div className="unauthorized text-center mt-5">
-                <h2>권한이 없습니다</h2>
-                <p>You do not have permission to view this content.</p>
-            </div>
-        );
-    }
 
     return (
         <main className="flex min-h-screen flex-col items-center p-6 bg-white-100">
@@ -73,7 +70,7 @@ export default function ShowNotice() {
 
                     )}
                 </table>
-                {notice && (
+                {role === 'ADMIN' && (
                     <div className="mt-4">
                         <button
                             onClick={() => router.push(`/notice/update/${id}`)}

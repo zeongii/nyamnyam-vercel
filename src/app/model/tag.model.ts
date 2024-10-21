@@ -7,5 +7,5 @@ export interface TagModel{
 export const initialTag: TagModel = {
     name: '',
     tagCategory: '',
-    postTags: []
+    postTags: [],
 }

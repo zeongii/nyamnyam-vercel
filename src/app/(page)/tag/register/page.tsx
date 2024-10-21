@@ -12,10 +12,15 @@ export default function TagRegister() {
   const [formData, setFormData] = useState<TagModel>(initialTag);
   const allTags: TagModel[] = Object.values(tags).flat();
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTag();
     fetchTagCategory();
+
+    const storedRole = localStorage.getItem('role');
+    setRole(storedRole);
+
 
   }, []);
 
@@ -53,7 +58,6 @@ export default function TagRegister() {
     });
   };
 
-  const role = localStorage.getItem('role');
 
   if (role !== 'ADMIN') {
     return (
@@ -66,6 +70,7 @@ export default function TagRegister() {
 
   return (
     <div className="heading4" style={{ marginTop: '30px' }}>
+      <div className="w-full lg:w-3/4 xl:w-2/3 mx-auto overflow-x-auto">
       <table className="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden mt-4 text-center">
         <thead>
           <tr className="bg-[#F46119] text-white">
@@ -129,8 +134,15 @@ export default function TagRegister() {
           >
             등록하기
           </button>
+          <button
+          className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded"
+          onClick={() => router.push(`/tag/tags`)}
+        >
+          목록
+        </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

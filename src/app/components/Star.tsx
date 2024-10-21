@@ -27,12 +27,12 @@ export default function Star({ w, h, readonly, rate, onChange }: StarModel) {
   // 별이 채워질 비율 계산
   const calculateRate = (rate: number, index: number): number => {
     if (rate >= index) {
-      return 100; // 정수 부분은 100% 채워짐
+      return 100; 
     } else if (rate > index - 1) {
       const decimal = rate - Math.floor(rate);
-      return decimal * 100; // 소수점 비율만큼 채움
+      return decimal * 100; 
     } else {
-      return 0; // 나머지는 채워지지 않음
+      return 0; 
     }
   };
 
@@ -49,7 +49,7 @@ export default function Star({ w, h, readonly, rate, onChange }: StarModel) {
           >
             {/* 회색 별 */}
             <Icon.Star size={24} color="#9FA09C" weight="fill" style={{ position: "absolute" }} />
-            {/* 노란색 별 (비율 조절) */}
+            {/* 노란색 별*/}
             <Icon.Star
               size={24}
               color="#FFD700"

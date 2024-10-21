@@ -38,14 +38,9 @@ const insert= async (formData: TagModel) => {
   return response.data;
 };
 
-const update = async (name: string, formData: TagModel) => {
-  const response = await strategy.PUT(`${api.tag}/${name}`, formData) 
-  return response.data;
-};
-
 const remove= async (name: string) => {
   const response = await strategy.DELETE(`${api.tag}/${name}`);
   return response;
 };
 
-export const tag = {getAllTags, getByCategories, getCategoryNames, getTagByName, getTop5Tags ,insert, update, remove}; 
+export const tag = {getAllTags, getByCategories, getCategoryNames, getTagByName, getTop5Tags ,insert, remove}; 

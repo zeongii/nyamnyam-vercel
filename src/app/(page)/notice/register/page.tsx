@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import {NoticeModel} from "src/app/model/notice.model";
 import {fetchNoticeRegister} from "src/app/service/notice/notice.service";
@@ -8,6 +8,13 @@ export default function InsertNotice() {
     const [title, setTitle] = useState<string>('');
     const [content, setContent] = useState<string>('');
     const router = useRouter();
+    const [role, setRole] = useState<string | null>(null);
+
+
+    useEffect(() => {
+        const storedRole = localStorage.getItem('role');
+        setRole(storedRole);
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +35,6 @@ export default function InsertNotice() {
         }
     };
 
-    const role = localStorage.getItem('role');
 
     if (role !== 'ADMIN') {
         return (

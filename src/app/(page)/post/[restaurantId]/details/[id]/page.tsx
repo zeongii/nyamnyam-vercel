@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Star from "src/app/components/Star";
 import { PostModel } from "src/app/model/post.model";
 import { postService } from "src/app/service/post/post.service";
+import * as Icon from "@phosphor-icons/react/dist/ssr";
 import nookies from 'nookies';
 import Modal from "@/app/components/Modal";
 import Image from 'next/image'
@@ -36,7 +37,6 @@ export default function PostDetail() {
     }
   }
 
-  // 이미지 modal 
   const openModal = (imageURL: string) => {
     setCurrentImg(imageURL);
     setIsOpen(true);
@@ -108,9 +108,13 @@ export default function PostDetail() {
             </Modal>
 
             <div className="user mt-3">
-              <div className="text-title">{post?.nickname || '닉네임 없음'}</div>
+              <div className="flex text-title">
+              <Icon.IdentificationCard size={24} color='#F46119' style={{marginRight: '4px'}}/>
+                {post?.nickname || '닉네임 없음'}</div>
               <div className="flex items-center gap-2">
-                <div className="text-secondary2">{post?.entryDate && formDate(post.entryDate)}</div>
+                <div className="flex text-secondary2">
+                <Icon.Calendar size={24} color='#F46119' style={{marginRight: '4px'}}/>
+                  {post?.entryDate && formDate(post.entryDate)}</div>
               </div>
             </div>
           </div>

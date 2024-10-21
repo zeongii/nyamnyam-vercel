@@ -28,8 +28,9 @@ import nookies from 'nookies';
 import {User} from "@/app/model/user.model";
 import Account from "@/app/(page)/user/account/page";
 import {getUserById} from "@/app/service/user/user.service";
+import ReplyHandler from './reply/page';
 
-const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
+const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
     const [posts, setPosts] = useState<PostModel[]>([]);
     const [restaurant, setRestaurant] = useState<RestaurantModel | null>(null);
     const [images, setImages] = useState<{ [key: number]: string[] }>({});
@@ -39,9 +40,6 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
     const [likeCount, setLikeCounts] = useState<{ [key: number]: number }>({});
     const [replyToggles, setReplyToggles] = useState<{ [key: number]: boolean }>({});
     const [replies, setReplies] = useState<{ [key: number]: ReplyModel[] }>({});
-    const [replyInput, setReplyInput] = useState<{ [key: number]: string }>({});
-    const [editReply, setEditReply] = useState<{ [key: number]: boolean }>({});
-    const [editInput, setEditInput] = useState<{ [key: number]: string }>({});
     const [allAverage, setAllAverage] = useState<number>(0);
     const [tags, setTags] = useState<string[]>([]);
     const [top5Tags, setTop5Tags] = useState<string[]>([]);
@@ -72,11 +70,11 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
 
     useEffect(() => {
         if (restaurantId) {
-            fetchPosts(Number(restaurantId));
+            fetchPosts(restaurantId);
             fetchRestaurant();
-            fetchImgByRestaurant(Number(restaurantId));
-            fetchRestaurantDetails(Number(restaurantId));
-            fetchTopTags(Number(restaurantId));
+            fetchImgByRestaurant(restaurantId);
+            fetchRestaurantDetails(restaurantId);
+            fetchTopTags(restaurantId);
         }
     }, [restaurantId]);
 
@@ -115,7 +113,7 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
 
     const fetchRestaurant = async () => {
         if (restaurantId) {
-            const data = await fetchRestaurantService(Number(restaurantId));
+            const data = await fetchRestaurantService(restaurantId);
             if (data) setRestaurant(data);
         }
     };
@@ -145,7 +143,6 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
     const closeModal = () => {
         setIsOpen(false);
     }
-
 
     const handleDelete = async (postId: number) => {
         if (window.confirm("게시글을 삭제하시겠습니까?")) {
@@ -199,102 +196,11 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
     const toggleReply = async (id: number) => {
         const { toggled, replies } = await replyService.toggle(id, replyToggles);
 
-        setReplyToggles((prevToggles) => ({
-            ...prevToggles,
-            [id]: toggled[id],
-        }));
-
-        setReplies(prevReplies => ({
+        setReplyToggles(toggled);
+        setReplies((prevReplies) => ({
             ...prevReplies,
             [id]: replies || prevReplies[id],
         }));
-    }
-
-    // 댓글 작성 (서버 연결)
-    const replySubmit = async (postId: number, e: FormEvent) => {
-        e.preventDefault();
-
-        const replyContent = replyInput[postId];
-        if (!replyContent) {
-            alert('댓글을 입력하세요.');
-            return;
-        }
-        const result = await replyService.submit(postId, replyContent, currentUserId, nickname, replyToggles);
-
-        if (result && result.success) {
-            const { newReply } = result;
-
-            setReplies((prevReplies) => ({
-                ...prevReplies,
-                [postId]: [...(prevReplies[postId] || []), newReply],
-            }));
-
-            setReplyInput((prevInput) => ({
-                ...prevInput,
-                [postId]: '',
-            }));
-        }
-    };
-
-    // 댓글 작성 & 수정 
-    const replyInputChange = (id: number, content: string, isEdit: boolean) => {
-        if (isEdit) { // 댓글 작성 (postId)
-            setReplyInput((prevInput) => ({
-                ...prevInput,
-                [id]: content,
-            }));
-        } else { // 댓글 수정 (replyId)
-            setEditInput((prevInput) => ({
-                ...prevInput,
-                [id]: content !== undefined ? content : "",
-            }));
-        }
-    }
-
-    // 수정 & 저장 버튼 
-    const replyEditClick = (replyId: number, currentContent: string) => {
-        setEditReply((prevEdit) => ({
-            ...prevEdit,
-            [replyId]: true,
-        }));
-        setEditInput((prevInput) => ({
-            ...prevInput,
-            [replyId]: currentContent || "",
-        }));
-    };
-
-    // 수정내용 저장 (서버연결)
-    const replyEditSave = async (replyId: number, postId: number) => {
-        const updateReply = await replyService.editSave(replyId, postId, editInput[replyId], currentUserId);
-        if (updateReply) {
-            setReplies((prevReplies) => ({
-                ...prevReplies,
-                [postId]: prevReplies[postId]?.map((reply) =>
-                    reply.id === replyId ? updateReply : reply
-                ),
-            }));
-
-            setEditReply((prevEditReply) => ({
-                ...prevEditReply,
-                [replyId]: false,
-            }));
-        } else {
-            console.log("댓글 수정 실패");
-        }
-    };
-
-    // 댓글 삭제 
-    const replyDelete = async (replyId: number, postId: number) => {
-        if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
-
-        const updatedReplies = await replyService.remove(replyId, postId, replies);
-
-        if (updatedReplies) {
-            setReplies(prevReplies => ({
-                ...prevReplies,
-                [postId]: updatedReplies
-            }));
-        }
     };
 
     // 날짜 포맷 지정 
@@ -413,7 +319,7 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
                                     const totalTag = tagCount.reduce((sum, count) => sum + count, 0);
                                     const percent = totalTag > 0 ? (tagCount[index] / totalTag) * 100 : 0;
 
-                                    return ( // JSX 반환을 위해 return 명시
+                                    return (
                                         <div key={index} className="item flex items-center justify-between gap-1.5">
                                             <div className="flex items-center gap-1">
                                                 <div className="rounded-full border border-gray-300 bg-white px-3 py-1 text-gray-600 font-semibold shadow-sm hover:bg-gray-100 mb-1"
@@ -520,7 +426,7 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
                                                 {p.nickname}
                                             </div>
                                             <Modal isOpen={isUserOpen} onClose={closeUserModal}>
-                                                {selectedUser && <Account user={selectedUser} />}
+                                                {selectedUser && <Account selectUser={selectedUser} />}
                                             </Modal>
                                             <div className="flex items-center gap-2">
                                                 <div className="flex text-secondary2">
@@ -622,90 +528,28 @@ const PostList: React.FC<PostListProps> = ({ restaurantId }) => {
                                                     />
                                                     <div className="text-button">{likeCount[p.id] || 0}</div>
                                                 </button>
-                                                <button onClick={() => toggleReply(p.id)} className="reply-btn text-button text-secondary cursor-pointer hover:text-black">Reply</button>
+                                                <button onClick={() => toggleReply(p.id)} className="flex reply-btn text-button text-secondary cursor-pointer hover:text-black">
+                                                    Reply <Icon.ChatCircleDots size={24} style={{ marginLeft: "4px" }} />
+                                                </button>
                                             </div>
-                                            {replyToggles[p.id] && (
-                                                <>
-                                                    <div className="mt-4 w-full">
-                                                        {replies[p.id] && replies[p.id].length > 0 ? (
-                                                            <ul className='list-none p-0 m-0'>
-                                                                {replies[p.id].map((reply, index) => (
-                                                                    <li key={index} className="mb-2 border-b border-gray-200 pb-2">
-                                                                        <div className="flex items-start justify-between">
-                                                                            <div className="flex items-center">
-                                                                                <span className="inline-block rounded-full bg-gray-300 px-3 py-1 text-sm font-semibold text-gray-700">
-                                                                                    {reply.nickname}
-                                                                                </span>
-                                                                                {editReply[reply.id] ? (
-                                                                                    <span className="ml-2" style={{ width: "600px", display: "inline-block", whiteSpace: "nowrap" }}>
-                                                                                        <textarea
-                                                                                            name="content"
-                                                                                            id="content"
-                                                                                            value={editInput[reply.id] !== undefined ? editInput[reply.id] : ""}
-                                                                                            onChange={(e) => replyInputChange(reply.id, e.target.value, false)}
-                                                                                            className="border rounded p-2 w-full"
-                                                                                            style={{ minHeight: "50px", width: "100%" }}
-                                                                                        />
-                                                                                    </span>
-                                                                                ) : (
-                                                                                    <span className="ml-2" style={{ width: "auto", display: "inline-block", whiteSpace: "pre-wrap", wordBreak: "break-word", overflowWrap: "break-word" }}>
-                                                                                        {reply.content}
-                                                                                    </span>
-                                                                                )}
-                                                                            </div>
-                                                                            <div className="text-gray-500 text-right" style={{ minWidth: '110px', maxWidth: '120px', marginLeft: '10px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                                                                {formatDate(reply.entryDate)}</div>
-                                                                        </div>
-
-                                                                        {reply.userId === currentUserId && (
-                                                                            <div className="flex justify-end space-x-2 mt-2">
-                                                                                <button
-                                                                                    className="button-main custom-button ${editReply[reply.id] ? 'w-[50px]' : 'w-[60px]'} px-4 py-2 bg-green-500 text-white rounded"
-                                                                                    style={{ backgroundColor: editReply[reply.id] ? '#4CAF50' : '#3B82F6', marginRight: '5px', }}
-                                                                                    onClick={() => editReply[reply.id] ? replyEditSave(reply.id, p.id) : replyEditClick(reply.id, reply.content)}
-                                                                                >
-                                                                                    {editReply[reply.id] ? '저장' : '수정'}
-                                                                                </button>
-                                                                                <button
-                                                                                    className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded"
-                                                                                    style={{ marginRight: '5px' }}
-                                                                                    onClick={() => reply.id && replyDelete(reply.id, p.id)}
-                                                                                >
-                                                                                    삭제
-                                                                                </button>
-                                                                            </div>
-                                                                        )}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        ) : (
-                                                            <p>댓글 없음</p>
-                                                        )}
-                                                    </div>
-                                                    <form onSubmit={(e) => replySubmit(p.id, e)} className="my-4 flex space-x-4">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="댓글을 입력하세요."
-                                                            value={replyInput[p.id] || ""}
-                                                            onChange={(e) => replyInputChange(p.id, e.target.value, true)}
-                                                            className="border rounded p-2 flex-grow" />
-                                                        <button
-                                                            type="submit"
-                                                            className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded">
-                                                            등록
-                                                        </button>
-                                                    </form>
-                                                </>
-                                            )}
+                                            <ReplyHandler
+                                                postId={p.id}
+                                                initialReplies={replies[p.id]}
+                                                currentId={currentUserId}
+                                                isOpen={replyToggles[p.id]}
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </>
                         <div className='flex justify-center'>
-                        <div className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded" onClick={handleViewMore}>
-                            {visible >= sortedPosts.length ? "Hide Reviews" : "View More Reviews"}
-                        </div>
+                            {sortedPosts.length > 2 && (
+                                <div className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded"
+                                    onClick={handleViewMore}>
+                                    {visible >= sortedPosts.length ? "Hide Reviews" : "View More Reviews"}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
