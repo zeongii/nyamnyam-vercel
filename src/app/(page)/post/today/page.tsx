@@ -15,15 +15,15 @@ import { replyService } from "@/app/service/reply/reply.service";
 import nookies from 'nookies';
 import { upvoteService } from "@/app/service/upvote/upvote.service";
 import ReplyHandler from "../[restaurantId]/reply/page";
-import { User } from "@/app/model/user.model";
 import { getUserById } from "@/app/service/user/user.service";
 import { ReportModel } from "@/app/model/report.model";
 import { fetchReportRegister } from "@/app/service/report/report.service";
-import Account from "../../user/account/page";
 import PostOptions from "@/app/components/PostOptions";
 import { postService } from "@/app/service/post/post.service";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { User } from "@/app/model/user.model";
+import Account from "../../user/account/page";
 
 export default function TodayPost() {
     const [todayPosts, setTodayPosts] = useState<PostModel[]>([]);
@@ -259,7 +259,7 @@ export default function TodayPost() {
                                             {post.nickname}
                                         </div>
                                         <Modal isOpen={isUserOpen} onClose={closeUserModal}>
-                                            {selectedUser && <Account user={selectedUser} />}
+                                            {selectedUser && <Account selectUser={selectedUser} />}
                                         </Modal>
                                         <div className="flex items-center gap-2">
                                             <div className="flex text-secondary2">

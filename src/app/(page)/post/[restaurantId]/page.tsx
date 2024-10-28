@@ -287,7 +287,19 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
         setIsUserOpen(false);
     }
 
+    const writeClick = () => {
+        const cookies = nookies.get();
+        const token = cookies['authToken'];
 
+        if(!token){
+            const confirmLogin = window.confirm('로그인 후 이용할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')
+            if(confirmLogin){
+                router.push(`/user/login`)
+            }
+            return;
+        }
+        router.push(`/post/register/${restaurantId}`);
+    };
 
     return (
         <>
@@ -299,7 +311,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
                         </div>
                         <button
                             className='button-main custom-button'
-                            onClick={() => router.push(`/post/register/${restaurantId}`)}
+                            onClick={writeClick}
                         >
                             Write Reviews
                         </button>
