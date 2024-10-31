@@ -541,7 +541,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
                                                     <div className="text-button">{likeCount[p.id] || 0}</div>
                                                 </button>
                                                 <button onClick={() => toggleReply(p.id)} className="flex reply-btn text-button text-secondary cursor-pointer hover:text-black">
-                                                    Reply <Icon.ChatCircleDots size={24} style={{ marginLeft: "4px" }} />
+                                                    댓글 <Icon.ChatCircleDots size={24} style={{ marginLeft: "4px" }} />
                                                 </button>
                                             </div>
                                             <ReplyHandler
