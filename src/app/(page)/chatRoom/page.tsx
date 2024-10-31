@@ -5,12 +5,11 @@ import Link from "next/link";
 import Image from 'next/image';
 import { useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
 import { useEffect, useState } from "react";
-import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails, insertChatRoom } from "src/app/service/chatRoom/chatRoom.api";
+import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails} from "src/app/service/chatRoom/chatRoom.api";
 import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
 import { ChatRoomModel } from "src/app/model/chatRoom.model";
 import { ChatModel } from "src/app/model/chat.model";
 import { getNotReadParticipantsCount, getUnreadCount, markMessageAsRead, updateReadBy } from "src/app/api/chat/chat.api";
-import dynamic from "next/dynamic"; // Next.js의 dynamic import 사용
 import React from "react";
 import { ChatRooms } from "@/app/components/ChatRooms";
 
@@ -23,7 +22,7 @@ export default function Home1() {
   const [messages, setMessages] = useState<ChatModel[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-
+  const router = useRouter();
   const [sender, setSender] = useState<string>(""); // 사용자 ID
   const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
   const [notReadParticipantsCount, setNotReadParticipantsCount] = useState<number>(0); // 읽지 않은 참가자 수
@@ -32,6 +31,7 @@ export default function Home1() {
   const [chatRoomName, setChatRoomName] = useState<string>(""); // 채팅방 이름
   const [newParticipantName, setNewParticipantName] = useState<string>(""); // 입력받은 참가자 이름
   const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
+  
 
   useEffect(() => {
     const nickname = localStorage.getItem('nickname')
@@ -39,7 +39,6 @@ export default function Home1() {
       setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
       fetchData(nickname);
     }
-
   }, []);
 
 
@@ -184,14 +183,14 @@ export default function Home1() {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (nickname) => {
     if (selectChatRooms.length === 0) {
       alert("삭제할 채팅방을 선택해주세요.");
       return;
     }
     if (window.confirm("선택한 채팅방을 삭제하시겠습니까?")) {
       try {
-        await deleteChatRoomsService(selectChatRooms);
+        await deleteChatRoomsService(selectChatRooms,nickname);
         alert("채팅방이 삭제되었습니다.");
         setChatRooms(prevChatRooms =>
           prevChatRooms.filter(room => !selectChatRooms.includes(room.id))

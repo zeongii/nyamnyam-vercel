@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { deleteChatRoomApi } from "../api/chatRoom/chatRoom.api";
 
 interface ChatRoomProps {
@@ -8,6 +8,7 @@ interface ChatRoomProps {
 
 export const ChatRooms: React.FC<ChatRoomProps> = ({ chatRoomId, nickname }) => {
     const [dropdown, setDropdown] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     const openDropdown = () => setDropdown(true);
     const closeDropdown = () => setDropdown(false);
@@ -23,8 +24,27 @@ export const ChatRooms: React.FC<ChatRoomProps> = ({ chatRoomId, nickname }) => 
         }
     };
 
+    // 외부 클릭 감지하여 드롭다운 닫기
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                closeDropdown();
+            }
+        };
+
+        if (dropdown) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [dropdown]);
+
     return (
-        <div className="relative inline-block">
+        <div className="relative inline-block" ref={dropdownRef}>
             <button 
                 className="flex items-center justify-center p-2 rounded-lg bg-gray-200 text-black hover:bg-gray-300 transition duration-200" 
                 onClick={openDropdown}

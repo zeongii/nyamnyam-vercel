@@ -1,3 +1,5 @@
+import { ChatRoomModel } from "@/app/model/chatRoom.model";
+
 // /src/app/api/chatRoom/chatRoom.api.ts
 let token: string | null = null;
 
@@ -5,6 +7,57 @@ if (typeof window !== "undefined") {
     // 브라우저 환경에서만 localStorage 접근
     token = localStorage.getItem('token');
 }
+
+export async function insertChatRoom(chatRoom: ChatRoomModel): Promise<any | { status: number; data?: any; message?: string }> {
+  try {
+    const response = await fetch('http://localhost:8081/api/chatRoom/save', {
+      method: 'POST',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        "Content-Type": "application/json",
+    },
+      body: JSON.stringify(chatRoom)
+    });
+
+    // 응답이 성공적일 경우 JSON 형태의 응답 데이터와 상태 코드 반환
+    const responseData = await response.json();
+    return { status: response.status, data: responseData };
+
+  } catch (e) {
+    console.error('Fetch operation failed:', e);
+    return { status: 500, message: 'Network error or server unavailable' };
+  }
+}
+
+export async function checkChatRoom(chatRoom: ChatRoomModel): Promise<any | { status: number; data?: any; message?: string }> {
+  try {
+    const response = await fetch('http://localhost:8081/api/chatRoom/check', {
+      method: 'POST',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        "Content-Type": "application/json",
+    },
+      body: JSON.stringify(chatRoom)
+    });
+
+    // 응답 상태가 성공적인지 확인
+    if (!response.ok) {
+      // 서버에서 에러 메시지를 제공하는 경우
+      const errorResponse = await response.text(); // 혹은 response.json()을 시도할 수도 있습니다.
+      return { status: response.status, message: errorResponse || 'Unexpected error occurred' };
+    }
+
+    // 성공적인 경우 JSON 형태의 응답 데이터와 상태 코드 반환
+    const responseData = await response.json();
+    return { status: response.status, data: responseData };
+
+  } catch (e) {
+    console.error('Fetch operation failed:', e);
+    return { status: 500, message: 'Network error or server unavailable' };
+  }
+}
+
+
 
 // 챗룸 출력(해당 유저가 참여한으로 수정 필요)
 export const fetchChatRooms = async (nickname: any) => {
