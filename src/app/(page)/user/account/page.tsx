@@ -25,7 +25,9 @@ export default function Account(user: Partial<AccountProps>) {
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const cookie = nookies.get();
     const userId = cookie.userId;
-    const router = useRouter();
+   
+    const router = useRouter();  // 페이지 이동을 위한 라우터
+   
 
     useEffect(() => {
 

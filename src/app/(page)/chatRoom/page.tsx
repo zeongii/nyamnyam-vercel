@@ -1,11 +1,11 @@
 "use client";
 
 import Head from "next/head";
-import Link from "next/link";
 import Image from 'next/image';
-import { useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
-import { useEffect, useState } from "react";
-import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails} from "src/app/service/chatRoom/chatRoom.api";
+import EmojiPicker from "src/app/components/EmojiPicker";
+import { useSearchParams , useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
+import { useEffect, useRef, useState } from "react";
+import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src/app/service/chatRoom/chatRoom.api";
 import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
 import { ChatRoomModel } from "src/app/model/chatRoom.model";
 import { ChatModel } from "src/app/model/chat.model";
@@ -22,7 +22,10 @@ export default function Home1() {
   const [messages, setMessages] = useState<ChatModel[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-  const router = useRouter();
+  const emojiPickerRef = useRef(null);
+  const searchParams = useSearchParams(); 
+  const router = useRouter();  // 페이지 이동을 위한 라우터
+  const id = searchParams.get('id'); // id 파라미터 가져오기
   const [sender, setSender] = useState<string>(""); // 사용자 ID
   const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
   const [notReadParticipantsCount, setNotReadParticipantsCount] = useState<number>(0); // 읽지 않은 참가자 수
@@ -31,16 +34,44 @@ export default function Home1() {
   const [chatRoomName, setChatRoomName] = useState<string>(""); // 채팅방 이름
   const [newParticipantName, setNewParticipantName] = useState<string>(""); // 입력받은 참가자 이름
   const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
-  
 
+
+  // useEffect(() => {
+  //   const nickname = localStorage.getItem('nickname')
+  //   if (nickname) {
+  //     setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
+  //     fetchData(nickname);
+  //   }
+  // }, []);
   useEffect(() => {
-    const nickname = localStorage.getItem('nickname')
-    if (nickname) {
-      setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
-      fetchData(nickname);
-    }
-  }, []);
+    if (typeof window !== 'undefined') { // 클라이언트 환경에서만 실행
+      const nickname = localStorage.getItem('nickname');
+      console.log(id); // ID 확인
+      if (nickname) {
+        setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
 
+        if (id) {
+          const fetchChatRoomDetails = async () => {
+            try {
+              fetchData(nickname);
+              const chatRoomData = await getChatRoomDetails(id);
+              console.log(chatRoomData); // 데이터 확인
+              setSelectedChatRoomId(chatRoomData.id);
+              setMessages(chatRoomData.messages || []); // 초기 메시지 설정
+              console.log(chatRoomData.messages); // 메시지 확인
+            } catch (error) {
+              console.error('채팅방 데이터를 가져오는 중 오류 발생:', error);
+            }
+          };
+
+          fetchChatRoomDetails();
+        } else {
+          // 채팅방 ID가 없으면 기존 초기 상태 유지
+          fetchData(nickname);
+        }
+      }
+    }
+  }, [selectedChatRoomId]);
 
   const fetchData = async (nickname: string) => {
     if (!nickname) return;
@@ -183,6 +214,34 @@ export default function Home1() {
     }
   };
 
+  // 이모지 선택창 표시/숨김 토글 함수
+  const toggleEmojiPicker = () => {
+    setShowEmojiPicker((prev) => !prev);
+
+  };
+  // 외부 클릭 시 이모지 선택창 닫기
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false); // 선택창 닫기
+      }
+    }
+
+    // 클릭 이벤트 리스너 추가
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // 컴포넌트 언마운트 시 이벤트 리스너 제거
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
+  // 이모티콘 선택 핸들러 함수
+  const handleEmojiSelect = (emoji: string) => {
+    setNewMessage((prevMessage) => prevMessage + emoji);
+  };
+
+
   const handleDelete = async (nickname) => {
     if (selectChatRooms.length === 0) {
       alert("삭제할 채팅방을 선택해주세요.");
@@ -190,7 +249,7 @@ export default function Home1() {
     }
     if (window.confirm("선택한 채팅방을 삭제하시겠습니까?")) {
       try {
-        await deleteChatRoomsService(selectChatRooms,nickname);
+        await deleteChatRoomsService(selectChatRooms, nickname);
         alert("채팅방이 삭제되었습니다.");
         setChatRooms(prevChatRooms =>
           prevChatRooms.filter(room => !selectChatRooms.includes(room.id))
@@ -342,7 +401,7 @@ export default function Home1() {
                                 <ChatRooms
                                   chatRoomId={room.id}
                                   nickname={localStorage.getItem('nickname')}
-                                  />                                
+                                />
                               </div>
                             </div>
                           </li>
@@ -410,6 +469,20 @@ export default function Home1() {
                   <div className="chat-messages-footer">
                     <form onSubmit={sendMessage} className="chat-messages-form flex mt-4">
                       <div className="chat-messages-form-controls flex-grow">
+                        <button
+                          type="button"
+                          onClick={toggleEmojiPicker}
+                          className="emoji-picker-button px-2 py-1 rounded-md mr-2 border"
+                        >
+                          😊
+                        </button>
+
+                        {showEmojiPicker && (
+                          <div ref={emojiPickerRef} className="absolute bottom-16 left-0 z-50">
+                            <EmojiPicker onSelectEmoji={handleEmojiSelect} />
+                          </div>
+                        )}
+
                         <input
                           type="text"
                           placeholder="Type your message..."
