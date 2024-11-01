@@ -4070,7 +4070,7 @@ node-sass@^9.0.0:
 
 nookies@^2.5.2:
   version "2.5.2"
-  resolved "https://registry.npmjs.org/nookies/-/nookies-2.5.2.tgz"
+  resolved "https://registry.yarnpkg.com/nookies/-/nookies-2.5.2.tgz#cc55547efa982d013a21475bd0db0c02c1b35b27"
   integrity sha512-x0TRSaosAEonNKyCrShoUaJ5rrT5KHRNZ5DwPCuizjgrnkpE5DRf3VL7AyyQin4htict92X1EQ7ejDbaHDVdYA==
   dependencies:
     cookie "^0.4.1"
