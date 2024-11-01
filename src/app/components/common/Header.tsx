@@ -7,6 +7,7 @@ import { useModalWishlistContext } from 'src/app/context/ModalWishlistContext';
 import { useRouter } from 'next/navigation';
 import nookies from "nookies";
 import { useSearchContext } from '../SearchContext';
+import { useUserContext } from '@/app/context/UserContext';
 
 
 interface User {
@@ -20,7 +21,7 @@ interface User {
 export default function Header() {
   const { openModalWishlist } = useModalWishlistContext();
   const { setSearchTerm } = useSearchContext(); 
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser } = useUserContext(); // UserContext에서 사용자 정보 가져오기
   const router = useRouter();
 
   useEffect(() => {

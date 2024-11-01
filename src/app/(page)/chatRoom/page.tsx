@@ -1,15 +1,16 @@
 "use client";
 
+
 import Head from "next/head";
 import Image from 'next/image';
 import EmojiPicker from "src/app/components/EmojiPicker";
-import { useSearchParams , useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
-import { useEffect, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
+import { Suspense, useEffect, useRef, useState } from "react";
 import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src/app/service/chatRoom/chatRoom.api";
 import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
 import { ChatRoomModel } from "src/app/model/chatRoom.model";
 import { ChatModel } from "src/app/model/chat.model";
-import { getNotReadParticipantsCount, getUnreadCount, markMessageAsRead, updateReadBy } from "src/app/api/chat/chat.api";
+import { getUnreadCount, markMessageAsRead } from "src/app/api/chat/chat.api";
 import React from "react";
 import { ChatRooms } from "@/app/components/ChatRooms";
 
@@ -23,55 +24,39 @@ export default function Home1() {
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const emojiPickerRef = useRef(null);
-  const searchParams = useSearchParams(); 
-  const router = useRouter();  // 페이지 이동을 위한 라우터
+  const searchParams = useSearchParams();
   const id = searchParams.get('id'); // id 파라미터 가져오기
   const [sender, setSender] = useState<string>(""); // 사용자 ID
   const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
-  const [notReadParticipantsCount, setNotReadParticipantsCount] = useState<number>(0); // 읽지 않은 참가자 수
   const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
-  const [user, setUser] = useState(null);
-  const [chatRoomName, setChatRoomName] = useState<string>(""); // 채팅방 이름
-  const [newParticipantName, setNewParticipantName] = useState<string>(""); // 입력받은 참가자 이름
   const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
+  const formatTime = (date) => {
+  return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(date);
+};
 
-
-  // useEffect(() => {
-  //   const nickname = localStorage.getItem('nickname')
-  //   if (nickname) {
-  //     setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
-  //     fetchData(nickname);
-  //   }
-  // }, []);
   useEffect(() => {
-    if (typeof window !== 'undefined') { // 클라이언트 환경에서만 실행
+    if (typeof window !== 'undefined') {
       const nickname = localStorage.getItem('nickname');
-      console.log(id); // ID 확인
       if (nickname) {
-        setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
-
+        setSender(nickname);
         if (id) {
           const fetchChatRoomDetails = async () => {
             try {
-              fetchData(nickname);
               const chatRoomData = await getChatRoomDetails(id);
-              console.log(chatRoomData); // 데이터 확인
               setSelectedChatRoomId(chatRoomData.id);
-              setMessages(chatRoomData.messages || []); // 초기 메시지 설정
-              console.log(chatRoomData.messages); // 메시지 확인
+              setMessages(chatRoomData.messages || []);
             } catch (error) {
               console.error('채팅방 데이터를 가져오는 중 오류 발생:', error);
             }
           };
-
           fetchChatRoomDetails();
         } else {
-          // 채팅방 ID가 없으면 기존 초기 상태 유지
-          fetchData(nickname);
+          fetchData(nickname); // 기본 데이터 로딩
         }
       }
     }
-  }, [selectedChatRoomId]);
+  }, [id]); // selectedChatRoomId를 제거
+
 
   const fetchData = async (nickname: string) => {
     if (!nickname) return;
@@ -273,18 +258,6 @@ export default function Home1() {
     );
   });
 
-
-  //===========================================여기 까지 serviceInsertReply,api 끝!!!!=============================================
-
-  const handleCheck = (roomId: string) => {
-    // 선택된 채팅방 ID가 이미 배열에 존재하면 제거, 없으면 추가
-    setSelectChatRooms((prevSelectedRooms) =>
-      prevSelectedRooms.includes(roomId)
-        ? prevSelectedRooms.filter((id) => id !== roomId)
-        : [...prevSelectedRooms, roomId]
-    );
-  };
-
   return (
     <>
       <Head>
@@ -452,9 +425,9 @@ export default function Home1() {
                           </div>
                           <div className="messages-item__text">{msg.message}</div>
                           {msg.sender !== sender ? (
-                            <div className="messages-item__time text-gray-500 text-xs">{new Date(msg.createdAt).toLocaleTimeString()}</div>
+                            <div className="messages-item__time text-gray-500 text-xs">{formatTime(new Date(msg.createdAt))}</div>
                           ) : (
-                            <div className="messages-item__time text-gray-500 text-xs ml-auto">{new Date(msg.createdAt).toLocaleTimeString()}</div>
+                            <div className="messages-item__time text-gray-500 text-xs ml-auto">{formatTime(new Date(msg.createdAt))}</div>
                           )}
                           {/* 안 읽은 메시지 수 표시 */}
                           {countNotReadParticipants(msg) > 0 && (
@@ -465,7 +438,7 @@ export default function Home1() {
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </div>                  
                   <div className="chat-messages-footer">
                     <form onSubmit={sendMessage} className="chat-messages-form flex mt-4">
                       <div className="chat-messages-form-controls flex-grow">
@@ -507,5 +480,5 @@ export default function Home1() {
         </div>
       </main>
     </>
-  );
+  );  
 };

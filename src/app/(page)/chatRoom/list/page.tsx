@@ -1,263 +1,202 @@
-"use client";
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { deleteChatRoomsService, getChatRoomData } from '@/app/service/chatRoom/chatRoom.api';
+import { getUnreadCount } from '@/app/api/chat/chat.api';
+import { ChatRooms } from '@/app/components/ChatRooms';
+import Head from 'next/head';
+import ChatRoomDetails from '../details/[id]/page';
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {ChatRoomModel} from "@/app/model/chatRoom.model";
-
-
-export default function Home1() {
-  const [chatRooms, setChatRooms] = useState<ChatRoomModel[]>([]);
+const ChatRoomList = () => {
+  const [chatRooms, setChatRooms] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sender, setSender] = useState('');
+  const [selectedChatRoomId, setSelectedChatRoomId] = useState(null);
+  
 
-  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태 추가
-  const [totalPages, setTotalPages] = useState(1); // 총 페이지 수 상태 추가
-
-  const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
-  const router = useRouter();
-
-  // 기본 상태
   useEffect(() => {
-    fetchData(currentPage);
-  }, [currentPage]); // currentPage가 변경될 때마다 데이터 새로 고침
-
-  const fetchData = async (pageNo: number) => {
-    setLoading(true); // 로딩 상태 시작
-
-    try {
-      const response = await fetch(`http://localhost:8081/api/chatRoom/findAll`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+    if (typeof window !== 'undefined') {
+      const nickname = localStorage.getItem('nickname');
+      if (nickname) {
+        setSender(nickname);
+        fetchChatRooms(nickname); // 기본 데이터 로딩
       }
-      const data = await response.json();
-      setChatRooms(data);
+    }
+  }, []);
 
-      const totalCountResponse = await fetch('http://localhost:8081/api/chatRoom/count');
-      const totalCount = await totalCountResponse.json();
-      setTotalPages(Math.ceil(totalCount / 10));
+  const fetchChatRooms = async (nickname) => {
+    setLoading(true);
+    try {
+      const { chatRooms } = await getChatRoomData(nickname);
+      setChatRooms(chatRooms);
+      await fetchUnreadCounts(chatRooms); // 읽지 않은 메시지 수 가져오기
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false); // 로딩 상태 종료
+      setLoading(false);
     }
   };
 
-
-  // 페이지 네이션 적용
-  // const fetchChannels = () => {
-  //   fetch('http://localhost:8081/api/channels/findAllPerPage/1')
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error('Network response was not ok');
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((data) => {
-  //       setChannels(data);
-  //     })
-  //     .catch((error) => {
-  //       console.error('There has been a problem with your fetch operation:', error);
-  //     });
-  // };
-
-  // 디테일 원
-  const handleDetails = (id: any) => {
-    console.log(id)
-    router.push('/channel/details/${id}');
-  };
-
-  const handleCheck = (id: any) => {
-    setSelectChatRooms((prevSelected: string[]) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((channelId: string) => channelId !== id)
-        : [...prevSelected, id]
-    );
-  };
-
-  const handleDelete = () => {
-    if (selectChatRooms.length === 0) {
-        alert("삭제할 게시글을 선택해주세요.");
-        return;
-    }
-    if (window.confirm("선택한 게시글을 삭제하시겠습니까?")) {
-        Promise.all(selectChatRooms.map((id: any) =>
-            fetch(`http://localhost:8081/api/chatRoom/deleteById/${id}`, { method: 'DELETE' })
-        ))
-        .then(() => {
-            alert("게시글이 삭제되었습니다.");
-            setChatRooms(prevChatRooms => 
-                prevChatRooms.filter(room => !selectChatRooms.includes(room.id)) // 삭제한 방을 제외
-            );
-            setSelectChatRooms([]); // 선택 초기화
-        })
-        .catch(error => {
-            console.error('Delete operation failed:', error);
-            alert("삭제 중 오류가 발생했습니다.");
-        });
-    }
-};
-
-  const handleCrawling = async () => {
+  const fetchUnreadCounts = async (rooms) => {
     try {
-      const response = await fetch(`http://localhost:8081/api/chatRoom/crawling`, { method: 'GET' });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.length > 0) {
-          alert(`크롤링 결과를 받았습니다: ${data.length}개의 항목`);
-        } else {
-          alert('크롤링 결과가 없습니다.');
-        }
-      } else {
-        throw new Error('응답 오류');
+      const updatedRooms = await Promise.all(
+        rooms.map(async (room) => {
+          const unreadCountResult = await getUnreadCount(room.id, sender);
+          return { ...room, unreadCount: unreadCountResult };
+        })
+      );
+      setChatRooms(updatedRooms);
+    } catch (error) {
+      console.error('Error fetching unread counts:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    if (!sender) return;
+
+    const fetchUnreadCounts = async () => {
+      try {
+        const updatedChatRooms = await Promise.all(
+          chatRooms.map(async (room) => {
+            const unreadCountResult = await getUnreadCount(room.id, sender);
+            return { ...room, unreadCount: unreadCountResult };
+          })
+        );
+
+        setChatRooms(updatedChatRooms);
+      } catch (error) {
+        console.error('읽지 않은 메시지 수를 가져오는 중 오류 발생:', error);
       }
-    } catch (error: any) {
-      alert(`크롤링 오류 발생: ${error.message}`);
-    }
-  };
-  const handleNone = async () => {
-    alert('크롤링 막았놓았습니다.')
-  }
+    };
 
+    fetchUnreadCounts();
+  }, [sender]); // chatRooms를 제거하여 무한 루프 방지
 
-  const handlePage = (pageNo: number) => {
-    if (pageNo < 1 || pageNo > totalPages) return; // 페이지 번호 유효성 검사
-    setCurrentPage(pageNo);
-  };
-
-
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxPagesToShow = 5;
-    let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 1);
-    let endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
-
-    // Adjust the start page if there are not enough pages before the current page
-    if (endPage - startPage + 1 < maxPagesToShow) {
-      startPage = Math.max(endPage - maxPagesToShow + 1, 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
-    }
-
-    return pageNumbers;
-  };
-
+  const filteredChatRooms = chatRooms.filter((room) => {
+    const participantsStr = room.participants.join(' ').toLowerCase();
+    return (
+      room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      participantsStr.includes(searchTerm.toLowerCase())
+    );
+  });
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-6 bg-gray-100">
-      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
-        <table className="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">
-          <thead>
-            <tr className="bg-blue-600 text-white">
-              <th className="py-3 px-4 border-b"></th>
-              <th className="py-3 px-4 border-b">채널 아이디</th>
-              <th className="py-3 px-4 border-b">채널 이름</th>
-              <th className="py-3 px-4 border-b">참가자</th>
-            </tr>
-          </thead>
-          <tbody>
-            {chatRooms.map((c) => (
-              <tr key={c.id} className="border border-indigo-600">
-                <td className="py-3 px-4 border-b">
-                  <input
-                    type="checkbox"
-                    checked={selectChatRooms.includes(c.id)}
-                    onChange={() => handleCheck(c.id)}
-                  />
-                </td>
-                <td className="py-3 px-4 border-b">
-                  <Link
-                    href={`/chatRoom/details/${c.id}`}
-                    className="text-blue-600 hover:underline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDetails(c.id ?? null);
-                    }}
-                  >
-                    {c.id}
-                  </Link>
-                </td>
-                <td className="py-3 px-4 border-b">{c.name ? c.name : "No Name"}</td>
-                <td className="py-3 px-4 border-b">
-  {c.participants && c.participants.length > 0 ? (
-    <ul>
-      {c.participants.map((participant: any, index: number) => (
-        <li key={index}>
-          {participant.nickname || "No Nickname"}
-        </li>
-      ))}
-    </ul>
-  ) : (
-    "No Participants"
-  )}
-</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="mt-4">
-          <button
-            className="bg-transparent hover:bg-green-500 text-green-700 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded mr-2"
-            onClick={handleNone}>
-            크롤링
-          </button>
-          <button
-            className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded mr-2"
-            onClick={() => router.push('post/register')}>
-            등록하기
-          </button>
-          <button
-            className="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded mr-2"
-            onClick={handleDelete}>
-            삭제하기
-          </button>
-          <button
-            className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded mr-2"
-            onClick={() => handlePage(1)}>
-            첫 페이지
-          </button>
-        </div>
-      </div>
-      <nav aria-label="Page navigation example">
-        <ul className="flex items-center -space-x-px h-8 text-sm">
-          <li>
-            <button
-              onClick={() => handlePage(currentPage - 1)}
-              className="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700"
-              disabled={currentPage <= 1}
-            >
-              <span className="sr-only">Previous</span>
-              <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" />
-              </svg>
-            </button>
-          </li>
-          {getPageNumbers().map(page => (
-            <li key={page}>
-              <button
-                onClick={() => handlePage(page)}
-                className={`flex items-center justify-center px-3 h-8 leading-tight ${currentPage === page ? 'text-blue-600 border-blue-300 bg-blue-50' : 'text-gray-500 border-gray-300'} hover:bg-gray-100 hover:text-gray-700`}
-              >
-                {page}
-              </button>
-            </li>
-          ))}
-          <li>
-            <button
-              onClick={() => handlePage(currentPage + 1)}
-              className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700"
-              disabled={currentPage >= totalPages}
-            >
-              <span className="sr-only">Next</span>
-              <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
-              </svg>
-            </button>
-          </li>
-        </ul>
-      </nav>
+    <>
+      <Head>
+        <meta charSet="utf-8" />
+        <title>냠냠</title>
+        <meta name="author" content="Templines" />
+        <meta name="description" content="TeamHost" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="HandheldFriendly" content="true" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon" />
+        <link rel="stylesheet" href="/assets/css/libs.min.css" />
+        <link rel="stylesheet" href="/assets/css/main.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet" />
+      </Head>
+      <main className="page-main">
+        <h3 className="uk-text-lead">Chats</h3>
+        <div className="uk-grid uk-grid-small" data-uk-grid>
+          <div className="uk-width-1-3@l">
+            <div className="chat-user-list">
+              <div className="chat-user-list__box" style={{ width: '90%', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '16px', backgroundColor: '#F9F9F9', height: '900px', overflowY: 'auto' }}>
+                <div className="chat-user-list__head" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                  <div className="avatar">
+                    <Image src="/assets/img/profile.png" alt="profile" width={40} height={40} style={{ borderRadius: '50%' }} />
+                  </div>
+                  <h2 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 'bold', color: '#4A4A4A' }}>Chat Rooms</h2>
+                </div>
+                <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} />
+                <div className="chat-user-list__search" style={{ marginBottom: '8px' }}>
+                  <div className="search" style={{ position: 'relative' }}>
+                    <i className="ico_search" style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', color: '#888' }}></i>
+                    <input
+                      type="search"
+                      name="search"
+                      placeholder="Search"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px 10px 36px',
+                        borderRadius: '24px',
+                        border: '1px solid #ddd',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      }}
+                    />
+                  </div>
+                </div>
+                <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} />
+                <div className="chat-user-list__body">
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {filteredChatRooms.map((room) => {
+                      const currentUserNickname = "kidon"; // 로그인한 유저 닉네임
+                      const otherParticipants = room.participants.filter(participant => participant !== currentUserNickname);
+                      const otherParticipantsStr = otherParticipants.length > 0 ? otherParticipants.join(', ') : "No Participants";
 
-    </main>
+                      return (
+                        <li key={room.id}>
+                          <div className="user-item --active" style={{ padding: '10px 0', backgroundColor: '#FFFFFF', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
+                            <div className="user-item__avatar">
+                              <Image src="/assets/img/user-list-1.png" alt="user" width={40} height={40} style={{ borderRadius: '50%' }} />
+                            </div>
+                            <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginLeft: '10px' }}>
+                              <a
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (room && room.id) {
+                                    setSelectedChatRoomId(room.id);
+                                  }
+                                }}
+                                style={{ textDecoration: 'none', color: '#4A4A4A', flexGrow: 2, fontSize: '16px' }}
+                              >
+                                <div className="user-item__name">
+                                  {`${otherParticipantsStr} ${room.name}`}
+                                </div>
+                              </a>
+                            </div>
+                            <div className="user-item__info" style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  display: room.unreadCount > 0 ? 'inline-block' : 'none',
+                                  backgroundColor: 'red',
+                                  color: 'white',
+                                  padding: '2px 8px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold',
+                                  minWidth: '20px',
+                                  textAlign: 'center',
+                                  marginRight: '10px'
+                                }}
+                              >
+                                {room.unreadCount}
+                              </span>
+                              <ChatRooms chatRoomId={room.id} nickname={localStorage.getItem('nickname')} />
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="uk-width-2-3@l">
+            <ChatRoomDetails chatRoomId={selectedChatRoomId} sender={sender} />
+          </div>
+        </div>
+      </main>
+    </>
   );
-}
+};
+
+export default ChatRoomList;
