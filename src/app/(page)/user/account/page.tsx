@@ -108,7 +108,8 @@ export default function Account(user: Partial<AccountProps>) {
         if (checkResult.status === 200 && checkResult.data) {
             // 채팅방이 존재하는 경우
             const existingChatRoom = checkResult.data;
-            router.push(`/chatRoom?id=${existingChatRoom.id}`); // 기존 채팅방으로 이동
+            const id = existingChatRoom.id
+            router.push(`/chatRoom/${id}`); // 기존 채팅방으로 이동
         } else {
             // 채팅방이 존재하지 않는 경우, 새로운 채팅방 생성
             const createResult = await insertChatRoom(newChatRoom);
@@ -116,8 +117,9 @@ export default function Account(user: Partial<AccountProps>) {
             if (createResult.status === 200 && createResult.data) {
                 alert("채팅방이 성공적으로 생성되었습니다.");
                 const createdChatRoom = createResult.data;
+                const id= createdChatRoom.id
                 console.log(createdChatRoom);
-                router.push(`/chatRoom?id=${createdChatRoom.id}`); // 생성된 채팅방으로 이동
+                router.push(`/chatRoom/${id}`); // 생성된 채팅방으로 이동
             } else {
                 console.error("채팅방 생성 실패", createResult);
                 alert("채팅방 생성 중 오류가 발생했습니다.");

@@ -3,18 +3,18 @@
 
 import Head from "next/head";
 import Image from 'next/image';
-
-import { useEffect, useRef, useState } from "react";
-import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "@/app/service/chatRoom/chatRoom.api";
-import { sendMessageService, subscribeMessages } from "@/app/service/chat/chat.api";
-import { ChatRoomModel } from "@/app/model/chatRoom.model";
-import { ChatModel } from "@/app/model/chat.model";
-import { getUnreadCount, markMessageAsRead } from "@/app/api/chat/chat.api";
+import EmojiPicker from "src/app/components/EmojiPicker";
+import { useSearchParams, useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
+import { Suspense, useEffect, useRef, useState } from "react";
+import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src/app/service/chatRoom/chatRoom.api";
+import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
+import { ChatRoomModel } from "src/app/model/chatRoom.model";
+import { ChatModel } from "src/app/model/chat.model";
+import { getUnreadCount, markMessageAsRead } from "src/app/api/chat/chat.api";
 import React from "react";
 import { ChatRooms } from "@/app/components/ChatRooms";
-import EmojiPicker from "@/app/components/EmojiPicker";
 
-export default function Home1(chatroomid) {
+export default function Home1(id) {
   const [chatRooms, setChatRooms] = useState<ChatRoomModel[]>([]);
   const [selectedChatRoomId, setSelectedChatRoomId] = useState<string | null>(null);
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoomModel | null>(null);
@@ -24,51 +24,52 @@ export default function Home1(chatroomid) {
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const emojiPickerRef = useRef(null);
+  const searchParams = useSearchParams();
 
-
-  const id = chatroomid;
   const [sender, setSender] = useState<string>(""); // 사용자 ID
   const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
   const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
   const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
   const formatTime = (date) => {
-  return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(date);
-};
+    return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(date);
+  };
 
+  // 채팅방 정보와 메시지를 로딩하는 useEffect
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const nickname = localStorage.getItem('nickname');
-      if (nickname) {
-        setSender(nickname);
-        fetchData(nickname); // 기본 데이터 로딩
-        if (id) {
-          const fetchChatRoomDetails = async () => {
-            try {
-              const chatRoomData = await getChatRoomDetails(id);
-              setSelectedChatRoomId(chatRoomData.id);
-              setMessages(chatRoomData.messages || []);
-            } catch (error) {
-              console.error('채팅방 데이터를 가져오는 중 오류 발생:', error);
+    const fetchData = async () => {
+      if (typeof window !== 'undefined') {
+        const nickname = localStorage.getItem('nickname');
+        if (nickname) {
+          setSender(nickname);
+          setLoading(true);
+          try {
+            // 사용자의 채팅방 목록 가져오기
+            const { chatRooms } = await getChatRoomData(nickname);
+            setChatRooms(chatRooms);
+
+            // 선택된 채팅방 ID 설정
+            if (id) {
+              setSelectedChatRoomId(id);
+              const chatRoomDetails = await getChatRoomDetails(id);
+              setSelectedChatRoom(chatRoomDetails);
+              setMessages(chatRoomDetails.messages || []); // 초기 메시지 설정
             }
-          };
-          fetchChatRoomDetails();
-        } 
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          } finally {
+            setLoading(false);
+          }
+        }
       }
-    }
-  }, [id]); // selectedChatRoomId를 제거
+    };
 
+    fetchData();
+  }, [id]); // id가 변경될 때마다 실행
 
-  const fetchData = async (nickname: string) => {
-    if (!nickname) return;
-    setLoading(true);
-    try {
-      const { chatRooms } = await getChatRoomData(nickname);
-      setChatRooms(chatRooms);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
+  // 읽지 않은 참가자 수를 계산하는 함수
+  const countNotReadParticipants = (message: ChatModel) => {
+    const readByCount = Object.keys(message.readBy).length; // 읽은 참가자 수
+    return message.totalParticipants - readByCount; // 읽지 않은 참가자 수
   };
 
   // 로그인한 사용자가 참여하고 있는 모든 채팅방의 읽지 않은 메시지 수 가져오기
@@ -93,40 +94,15 @@ export default function Home1(chatroomid) {
     fetchUnreadCounts();
   }, [sender, chatRooms]);
 
-  // 읽지 않은 참가자 수를 계산하는 함수
-  const countNotReadParticipants = (message: ChatModel) => {
-    const readByCount = Object.keys(message.readBy).length; // 읽은 참가자 수
-    return message.totalParticipants - readByCount; // 읽지 않은 참가자 수
-  };
-
-  // 선택된 채팅방의 메시지를 가져오고 읽음 상태 처리하기
+  // 메시지 스트리밍 및 읽음 상태 처리
   useEffect(() => {
     if (!selectedChatRoomId) return;
 
-    // 채팅방 정보 가져오기
-    getChatRoomDetails(selectedChatRoomId)
-      .then((data) => {
-        setSelectedChatRoom(data);
-        setMessages(data.messages || []); // 초기 메시지 설정
-        setUnreadCount(0); // 채팅방 열 때 unreadCount를 0으로 설정
-
-        // 읽지 않은 메시지 수를 0으로 설정
-        setChatRooms((prevRooms) =>
-          prevRooms.map((room) =>
-            room.id === selectedChatRoomId ? { ...room, unreadCount: 0 } : room
-          )
-        );
-      })
-      .catch((error) => console.error(error));
-
-    // 메시지 스트리밍 구독
     const eventSource = new EventSource(`http://localhost:8081/api/chats/${selectedChatRoomId}`);
 
     eventSource.onmessage = async (event) => {
       const newMessage = JSON.parse(event.data);
-
       setMessages((prevMessages) => {
-        // 새 메시지가 이미 존재하는지 확인
         const messageExists = prevMessages.some(msg => msg.id === newMessage.id);
         if (!messageExists) {
           // 새 메시지를 기존 메시지 목록에 추가
@@ -165,7 +141,7 @@ export default function Home1(chatroomid) {
 
     eventSource.onerror = (event) => {
       console.error("EventSource 에러:", event);
-      eventSource.close(); // 에러 발생 시 EventSource 종료
+      eventSource.close();
     };
 
     return () => {
@@ -322,7 +298,7 @@ export default function Home1(chatroomid) {
                 <div className="chat-user-list__body">
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {filteredChatRooms.map((room, index) => {
-                      const currentUserNickname = "kidon"; // 로그인한 유저의 닉네임
+                      const currentUserNickname = localStorage.getItem('nickname'); // 로그인한 유저의 닉네임
 
                       // 로그인한 사용자 닉네임을 제외한 참가자 목록 생성
                       const otherParticipants = room.participants.filter(participant => participant !== currentUserNickname);
@@ -396,7 +372,12 @@ export default function Home1(chatroomid) {
                     </div>
                     <div className="user-item__desc" style={{ width: 'full' }}>
                       <div className="user-item__name" style={{ textAlign: 'center', fontSize: '1.5rem' }}>
-                        {filteredChatRooms.find(room => room.id === selectedChatRoomId)?.name || "Unknown Room"}
+                        {/* 로그인한 유저 외 다른 참가자 이름과 채팅방 이름을 함께 출력 */}
+                        {`${filteredChatRooms
+                          .find(room => room.id === selectedChatRoomId)
+                          ?.participants
+                          .filter(participant => participant !== localStorage.getItem('nickname')) // 로그인한 사용자의 닉네임을 제외
+                          .join(', ') || "No Participants"} ${filteredChatRooms.find(room => room.id === selectedChatRoomId)?.name || "Unknown Room"}`}
                       </div>
                     </div>
                   </div>
@@ -438,7 +419,7 @@ export default function Home1(chatroomid) {
                         </div>
                       </div>
                     ))}
-                  </div>                  
+                  </div>
                   <div className="chat-messages-footer">
                     <form onSubmit={sendMessage} className="chat-messages-form flex mt-4">
                       <div className="chat-messages-form-controls flex-grow">
@@ -480,5 +461,5 @@ export default function Home1(chatroomid) {
         </div>
       </main>
     </>
-  );  
+  );
 };
