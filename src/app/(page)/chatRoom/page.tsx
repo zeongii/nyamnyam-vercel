@@ -1,10 +1,9 @@
 "use client";
 
-
 import Head from "next/head";
 import Image from 'next/image';
 import EmojiPicker from "src/app/components/EmojiPicker";
-import { useSearchParams, useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
+import { useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
 import { Suspense, useEffect, useRef, useState } from "react";
 import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src/app/service/chatRoom/chatRoom.api";
 import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
@@ -24,14 +23,25 @@ export default function Home1() {
     const [newMessage, setNewMessage] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
     const emojiPickerRef = useRef(null);
-    const searchParams = useSearchParams();
     const [sender, setSender] = useState<string>(""); // 사용자 ID
     const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
     const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
     const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
+
     const formatTime = (date) => {
-        return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(date);
+        // date가 문자열이라면 Date 객체로 변환
+        const validDate = (typeof date === 'string' || date instanceof Date) ? new Date(date) : null;
+    
+        // 변환 후에도 유효한 날짜인지 확인
+        if (!validDate || isNaN(validDate.getTime())) {
+            return 'Invalid Date';
+        }
+    
+        return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(validDate);
     };
+    
+
+
 
     useEffect(() => {
         if (typeof window !== 'undefined') {

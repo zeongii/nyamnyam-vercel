@@ -1,10 +1,9 @@
 "use client";
 
-
 import Head from "next/head";
 import Image from 'next/image';
 import EmojiPicker from "src/app/components/EmojiPicker";
-import { useSearchParams, useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
+import { useSearchParams, useRouter, useParams } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
 import { Suspense, useEffect, useRef, useState } from "react";
 import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src/app/service/chatRoom/chatRoom.api";
 import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
@@ -14,7 +13,7 @@ import { getUnreadCount, markMessageAsRead } from "src/app/api/chat/chat.api";
 import React from "react";
 import { ChatRooms } from "@/app/components/ChatRooms";
 
-export default function Home1(id) {
+export default function Home1() {
   const [chatRooms, setChatRooms] = useState<ChatRoomModel[]>([]);
   const [selectedChatRoomId, setSelectedChatRoomId] = useState<string | null>(null);
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoomModel | null>(null);
@@ -25,7 +24,7 @@ export default function Home1(id) {
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const emojiPickerRef = useRef(null);
   const searchParams = useSearchParams();
-
+  const { id } = useParams<{ id: string }>();
   const [sender, setSender] = useState<string>(""); // 사용자 ID
   const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
   const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
