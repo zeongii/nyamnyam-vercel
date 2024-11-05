@@ -97,7 +97,7 @@ export default function Home1() {
   useEffect(() => {
     if (!selectedChatRoomId) return;
 
-    const eventSource = new EventSource(`http://localhost:8081/api/chats/${selectedChatRoomId}`);
+    const eventSource = new EventSource(`https://abc.nyamnyam.kr/api/chats/${selectedChatRoomId}`);
 
     eventSource.onmessage = async (event) => {
       const newMessage = JSON.parse(event.data);
