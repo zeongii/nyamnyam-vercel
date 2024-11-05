@@ -7,17 +7,28 @@ import { useModalWishlistContext } from 'src/app/context/ModalWishlistContext';
 import { useRouter } from 'next/navigation';
 import nookies from "nookies";
 import { useSearchContext } from '../SearchContext';
+<<<<<<< HEAD
 import {fetchUserById} from "@/app/api/user/user.api";
 import {User} from "@/app/model/user.model";
+=======
+import { useUserContext } from '@/app/context/UserContext';
+>>>>>>> origin/release0.08
 
 
 export default function Header() {
+<<<<<<< HEAD
     const { openModalWishlist } = useModalWishlistContext();
     const { setSearchTerm } = useSearchContext();
     const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
     const cookies = nookies.get();
     const userId = cookies.userId;
+=======
+  const { openModalWishlist } = useModalWishlistContext();
+  const { setSearchTerm } = useSearchContext(); 
+  const { user, setUser } = useUserContext(); // UserContext에서 사용자 정보 가져오기
+  const router = useRouter();
+>>>>>>> origin/release0.08
 
 
     useEffect(() => {

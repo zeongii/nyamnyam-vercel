@@ -1733,7 +1733,7 @@
 
 "@fontsource/instrument-sans@^5.1.0":
   version "5.1.0"
-  resolved "https://registry.npmjs.org/@fontsource/instrument-sans/-/instrument-sans-5.1.0.tgz"
+  resolved "https://registry.yarnpkg.com/@fontsource/instrument-sans/-/instrument-sans-5.1.0.tgz#4b18c0a25c48577f6dcd026ef8f68480c6cc3692"
   integrity sha512-ybO+rM7FYDnh3mYyIs1UefL2/eHY0L6N1pRiiUZEo2E/FTixIUVmwnNn+APsJeo/7aqLTBN/VSUPRq+L45sxsQ==
 
 "@fortawesome/fontawesome-common-types@6.6.0":
@@ -1743,28 +1743,28 @@
 
 "@fortawesome/fontawesome-svg-core@^6.6.0":
   version "6.6.0"
-  resolved "https://registry.npmjs.org/@fortawesome/fontawesome-svg-core/-/fontawesome-svg-core-6.6.0.tgz"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-svg-core/-/fontawesome-svg-core-6.6.0.tgz#2a24c32ef92136e98eae2ff334a27145188295ff"
   integrity sha512-KHwPkCk6oRT4HADE7smhfsKudt9N/9lm6EJ5BVg0tD1yPA5hht837fB87F8pn15D8JfTqQOjhKTktwmLMiD7Kg==
   dependencies:
     "@fortawesome/fontawesome-common-types" "6.6.0"
 
 "@fortawesome/free-regular-svg-icons@^6.6.0":
   version "6.6.0"
-  resolved "https://registry.npmjs.org/@fortawesome/free-regular-svg-icons/-/free-regular-svg-icons-6.6.0.tgz"
+  resolved "https://registry.yarnpkg.com/@fortawesome/free-regular-svg-icons/-/free-regular-svg-icons-6.6.0.tgz#fc49a947ac8dfd20403c9ea5f37f0919425bdf04"
   integrity sha512-Yv9hDzL4aI73BEwSEh20clrY8q/uLxawaQ98lekBx6t9dQKDHcDzzV1p2YtBGTtolYtNqcWdniOnhzB+JPnQEQ==
   dependencies:
     "@fortawesome/fontawesome-common-types" "6.6.0"
 
 "@fortawesome/free-solid-svg-icons@^6.6.0":
   version "6.6.0"
-  resolved "https://registry.npmjs.org/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-6.6.0.tgz"
+  resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-6.6.0.tgz#061751ca43be4c4d814f0adbda8f006164ec9f3b"
   integrity sha512-IYv/2skhEDFc2WGUcqvFJkeK39Q+HyPf5GHUrT/l2pKbtgEIv1al1TKd6qStR5OIwQdN1GZP54ci3y4mroJWjA==
   dependencies:
     "@fortawesome/fontawesome-common-types" "6.6.0"
 
 "@fortawesome/react-fontawesome@^0.2.2":
   version "0.2.2"
-  resolved "https://registry.npmjs.org/@fortawesome/react-fontawesome/-/react-fontawesome-0.2.2.tgz"
+  resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-0.2.2.tgz#68b058f9132b46c8599875f6a636dad231af78d4"
   integrity sha512-EnkrprPNqI6SXJl//m29hpaNzOp1bruISWaOiRtkMi/xSvHJlzc2j2JAYS7egxt/EbjSNV/k6Xy0AQI6vB2+1g==
   dependencies:
     prop-types "^15.8.1"
@@ -2451,7 +2451,7 @@ attr-accept@^2.2.2:
 
 axios@^1.7.7:
   version "1.7.7"
-  resolved "https://registry.npmjs.org/axios/-/axios-1.7.7.tgz"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.7.tgz#2f554296f9892a72ac8d8e4c5b79c14a91d0a47f"
   integrity sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==
   dependencies:
     follow-redirects "^1.15.6"
@@ -3061,6 +3061,11 @@ event-source-polyfill@^1.0.31:
   resolved "https://registry.npmjs.org/event-source-polyfill/-/event-source-polyfill-1.0.31.tgz"
   integrity sha512-4IJSItgS/41IxN5UVAVuAyczwZF7ZIEsM1XAoUzIHA6A+xzusEZUutdXz2Nr+MQPLxfTiCvqE79/C8HT8fKFvA==
 
+eventsource-polyfill@^0.9.6:
+  version "0.9.6"
+  resolved "https://registry.npmjs.org/eventsource-polyfill/-/eventsource-polyfill-0.9.6.tgz"
+  integrity sha512-LyMFp2oPDGhum2lMvkjqKZEwWd2/AoXyt8aoyftTBMWwPHNgU+2tdxhTHPluDxoz+z4gNj0uHAPR9nqevATMbg==
+
 exenv@^1.2.0:
   version "1.2.2"
   resolved "https://registry.npmjs.org/exenv/-/exenv-1.2.2.tgz"
@@ -3638,7 +3643,7 @@ json5@^2.2.3:
 
 jwt-decode@^4.0.0:
   version "4.0.0"
-  resolved "https://registry.npmjs.org/jwt-decode/-/jwt-decode-4.0.0.tgz"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
   integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
 
 kind-of@^6.0.3:
@@ -4428,7 +4433,7 @@ rc-util@^5.35.0:
 
 react-bootstrap@^2.10.5:
   version "2.10.5"
-  resolved "https://registry.npmjs.org/react-bootstrap/-/react-bootstrap-2.10.5.tgz"
+  resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-2.10.5.tgz#2d3416fb4178d0f460ddafbfcab0aebfbbf1cf25"
   integrity sha512-XueAOEn64RRkZ0s6yzUTdpFtdUXs5L5491QU//8ZcODKJNDLt/r01tNyriZccjgRImH1REynUc9pqjiRMpDLWQ==
   dependencies:
     "@babel/runtime" "^7.24.7"
@@ -4478,7 +4483,7 @@ react-dropzone@^14.2.9:
 
 react-icons@^5.3.0:
   version "5.3.0"
-  resolved "https://registry.npmjs.org/react-icons/-/react-icons-5.3.0.tgz"
+  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-5.3.0.tgz#ccad07a30aebd40a89f8cfa7d82e466019203f1c"
   integrity sha512-DnUk8aFbTyQPSkCfF8dbX6kQjXA9DktMeJqfjrg6cK9vwQVMxmcA3BfP4QoiztVmEHtwlTgLFsPuH2NskKT6eg==
 
 react-is@^16.13.1, react-is@^16.3.2:
@@ -5084,7 +5089,7 @@ supports-preserve-symlinks-flag@^1.0.0:
 
 swiper@^11.1.14:
   version "11.1.14"
-  resolved "https://registry.npmjs.org/swiper/-/swiper-11.1.14.tgz"
+  resolved "https://registry.yarnpkg.com/swiper/-/swiper-11.1.14.tgz#7901b4955c46dd0ad76fac1e9de2a69f04f34abb"
   integrity sha512-VbQLQXC04io6AoAjIUWuZwW4MSYozkcP9KjLdrsG/00Q/yiwvhz9RQyt0nHXV10hi9NVnDNy1/wv7Dzq1lkOCQ==
 
 tailwindcss@^3.4.1:
