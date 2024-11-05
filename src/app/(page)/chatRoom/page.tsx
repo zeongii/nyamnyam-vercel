@@ -31,15 +31,15 @@ export default function Home1() {
     const formatTime = (date) => {
         // date가 문자열이라면 Date 객체로 변환
         const validDate = (typeof date === 'string' || date instanceof Date) ? new Date(date) : null;
-    
+
         // 변환 후에도 유효한 날짜인지 확인
         if (!validDate || isNaN(validDate.getTime())) {
             return 'Invalid Date';
         }
-    
+
         return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(validDate);
     };
-    
+
 
 
 
@@ -116,7 +116,7 @@ export default function Home1() {
             .catch((error) => console.error(error));
 
         // 메시지 스트리밍 구독
-        const eventSource = new EventSource(`https://abc.nyamnyam.kr/api/chats/${selectedChatRoomId}`);
+        const eventSource = new EventSource(`http://localhost:8081/api/chats/${selectedChatRoomId}`);
 
         eventSource.onmessage = async (event) => {
             const newMessage = JSON.parse(event.data);
@@ -390,14 +390,15 @@ export default function Home1() {
                                         <div className="user-item__avatar">
                                             <Image src="/assets/img/user-list-4.png" alt="user" width={40} height={40} />
                                         </div>
-                                        <div className="user-item__desc" style={{ width: 'full' }}>
-                                            <div className="user-item__name" style={{ textAlign: 'center', fontSize: '1.5rem' }}>
-                                                {/* 로그인한 유저 외 다른 참가자 이름과 채팅방 이름을 함께 출력 */}
+                                        <div className="user-item__desc" style={{ width: '100%' }}>
+                                            <div
+                                                className="user-item__name"
+                                                style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#2c3e50' }}
+                                            >
                                                 {`${filteredChatRooms
-                                                    .find(room => room.id === selectedChatRoomId)
-                                                    ?.participants
-                                                    .filter(participant => participant !== localStorage.getItem('nickname')) // 로그인한 사용자의 닉네임을 제외
-                                                    .join(', ') || "No Participants"} ${filteredChatRooms.find(room => room.id === selectedChatRoomId)?.name || "Unknown Room"}`}
+                                                    .find((room) => room.id === selectedChatRoomId)
+                                                    ?.participants.filter((participant) => participant !== localStorage.getItem('nickname'))
+                                                    .join(', ') || 'No Participants'} ${filteredChatRooms.find((room) => room.id === selectedChatRoomId)?.name || 'Unknown Room'}`}
                                             </div>
                                         </div>
                                     </div>
@@ -411,64 +412,85 @@ export default function Home1() {
                                         {messages.map((msg, index) => (
                                             <div
                                                 key={index}
-                                                className={`w-full messages-item ${msg.sender !== sender ? '--your-message' : '--friend-message'} flex`}
+                                                className={`message-container flex items-start ${msg.sender === sender ? 'justify-end' : 'justify-start'}`}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'row',
+                                                    marginBottom: '8px',
+                                                }}
                                             >
-                                                <div className="messages-item__avatar flex items-center mr-2">
-                                                    {msg.sender !== sender ? (
-                                                        <Image src="/assets/img/user-list-3.png" alt="img" width={40} height={40} />
-                                                    ) : (
-                                                        <Image src="/assets/img/user-list-4.png" alt="img" width={40} height={40} />
-                                                    )}
-                                                </div>
-                                                <div className="flex flex-col justify-start">
-                                                    <div className="flex items-center">
-                                                        <p className="text-sm font-semibold">{msg.sender}</p>
-                                                    </div>
-                                                    <div className="messages-item__text">{msg.message}</div>
-                                                    {msg.sender !== sender ? (
-                                                        <div className="messages-item__time text-gray-500 text-xs">{formatTime(new Date(msg.createdAt))}</div>
-                                                    ) : (
-                                                        <div className="messages-item__time text-gray-500 text-xs ml-auto">{formatTime(new Date(msg.createdAt))}</div>
-                                                    )}
-                                                    {/* 안 읽은 메시지 수 표시 */}
+                                                {/* 안 읽은 사람 수와 시간 표시 (상대방 메시지의 경우 왼쪽, 내 메시지의 경우도 왼쪽) */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        paddingRight: msg.sender === sender ? '8px' : '0px',
+                                                        paddingLeft: msg.sender !== sender ? '8px' : '0px',
+                                                        color: '#9E9E9E',
+                                                    }}
+                                                >
                                                     {countNotReadParticipants(msg) > 0 && (
-                                                        <span style={{ color: 'red', fontSize: '0.8em' }}>
-                                                            {countNotReadParticipants(msg)} unread
+                                                        <span style={{ color: '#FFD700', fontSize: '0.8em', textAlign: 'center' }}>
+                                                            {countNotReadParticipants(msg)}
                                                         </span>
                                                     )}
+                                                    <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
+                                                        {formatTime(new Date(msg.createdAt))}
+                                                    </span>
                                                 </div>
+
+                                                {/* 메시지 내용 박스 */}
+                                                <div
+                                                    className="message-box"
+                                                    style={{
+                                                        maxWidth: '70%',
+                                                        padding: '8px 12px',
+                                                        borderRadius: '10px',
+                                                        backgroundColor: msg.sender === sender ? '#d1e7ff' : '#f1f1f1',
+                                                        textAlign: msg.sender === sender ? 'right' : 'left',
+                                                    }}
+                                                >
+                                                    <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
+                                                </div>
+
+                                                {/* 오른쪽에 유저 닉네임 (상대방 메시지의 경우에만 오른쪽에 표시) */}
+                                                {msg.sender !== sender && (
+                                                    <div style={{ paddingLeft: '8px', alignSelf: 'center', color: '#2c3e50', fontWeight: 'bold', fontSize: '0.8em' }}>
+                                                        {msg.sender}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="chat-messages-footer">
-                                        <form onSubmit={sendMessage} className="chat-messages-form flex mt-4">
-                                            <div className="chat-messages-form-controls flex-grow">
-                                                <button
-                                                    type="button"
-                                                    onClick={toggleEmojiPicker}
-                                                    className="emoji-picker-button px-2 py-1 rounded-md mr-2 border"
-                                                >
-                                                    😊
-                                                </button>
+                                    <div className="chat-messages-footer bg-gray-100 p-4 rounded-b-lg">
+                                        <form onSubmit={sendMessage} className="chat-messages-form flex">
+                                            <button
+                                                type="button"
+                                                onClick={toggleEmojiPicker}
+                                                className="emoji-picker-button p-2 mr-2 border border-gray-300 rounded"
+                                            >
+                                                😊
+                                            </button>
 
-                                                {showEmojiPicker && (
-                                                    <div ref={emojiPickerRef} className="absolute bottom-16 left-0 z-50">
-                                                        <EmojiPicker onSelectEmoji={handleEmojiSelect} />
-                                                    </div>
-                                                )}
+                                            {showEmojiPicker && (
+                                                <div ref={emojiPickerRef} className="absolute bottom-16 left-0 z-50 bg-white shadow-lg p-2 rounded">
+                                                    <EmojiPicker onSelectEmoji={handleEmojiSelect} />
+                                                </div>
+                                            )}
 
-                                                <input
-                                                    type="text"
-                                                    placeholder="Type your message..."
-                                                    value={newMessage}
-                                                    onChange={(e) => setNewMessage(e.target.value)}
-                                                    className="chat-messages-input border border-gray-300 p-2"
-                                                    required
-                                                />
-                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Type your message..."
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                className="chat-messages-input flex-grow border border-gray-300 p-2 rounded-lg"
+                                                required
+                                            />
+
                                             <button
                                                 type="submit"
-                                                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg"
+                                                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 ml-2 rounded-lg"
                                             >
                                                 Send
                                             </button>

@@ -129,7 +129,7 @@ export default function Account(user: Partial<AccountProps>) {
 
 
     return (
-        <div className="w-full xl:pr-[3.125rem] lg:pr-[28px] md:pr-[16px]">
+        <div className="w-full lg:pr-[5px] md:pr-[5px]">
             <div className="user-infor bg-surface lg:px-7 px-4 lg:py-10 py-5 md:rounded-[20px] rounded-xl">
                 <div className="heading flex flex-col items-center justify-center">
                     <div className="avatar">
