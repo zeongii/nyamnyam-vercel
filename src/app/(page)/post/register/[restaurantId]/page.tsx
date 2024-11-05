@@ -100,7 +100,7 @@ export default function PostRegister() {
 
     newFormData.append("model", new Blob([JSON.stringify(postData)], {type: "application/json"}));
 
-    images.forEach((file) => {git p
+    images.forEach((file) => {
       newFormData.append("files", file);
     })
     try {
