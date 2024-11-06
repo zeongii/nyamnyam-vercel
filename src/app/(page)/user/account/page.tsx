@@ -98,7 +98,7 @@ export default function Account(user: Partial<AccountProps>) {
 
     const handleCreateChatRoom = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        
         const newChatRoom: any = {
             name: "님과의 채팅방",
             participants: [users.nickname, user.user.nickname],
