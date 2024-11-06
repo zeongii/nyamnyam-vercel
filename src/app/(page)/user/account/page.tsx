@@ -91,7 +91,10 @@ export default function Account(user: Partial<AccountProps>) {
         }
     };
 
-
+    const handleCreateRoom = () => {
+        setAlertMessage("채팅방이 생성되었습니다.");
+        setAlertOpen(true);
+    };
 
     const handleCreateChatRoom = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -110,17 +113,13 @@ export default function Account(user: Partial<AccountProps>) {
         } else {
             const createResult = await insertChatRoom(newChatRoom);
 
-            if (createResult.status === 200 && createResult.data) {
-                setAlertMessage("채팅방이 생성되었습니다.");
-                setAlertOpen(true);
 
+            if (createResult.status === 200 && createResult.data) {
                 const createdChatRoom = createResult.data;
                 const id = createdChatRoom.id;
                 router.push(`/chatRoom/${id}`);
             } else {
                 console.error("채팅방 생성 실패", createResult);
-                setAlertMessage("채팅방 생성 중 오류가 발생했습니다.");
-                setAlertOpen(true);
             }
         }
     };
@@ -171,7 +170,7 @@ export default function Account(user: Partial<AccountProps>) {
                 }
                 <button
                     className="px-4 py-2 ml-4 bg-[#3A9181] text-white rounded hover:bg-[#2C7365]"
-                    onClick={handleCreateChatRoom}
+                    onClick={handleCreateRoom} // 버튼 클릭 시 함수 실행
                 >
                     채팅하기
                 </button>
@@ -179,11 +178,11 @@ export default function Account(user: Partial<AccountProps>) {
                     <div className="p-4 text-center mt-5">
                         <h3 className="font-semibold text-lg">{alertMessage}</h3>
                         <button
-                            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
-                            onClick={() => setAlertOpen(false)}
+                            className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition duration-200 mr-4" // 오른쪽에 간격 추가
+                            onClick={handleCreateChatRoom}
                         >
                             확인
-                        </button>
+                        </button>                
                     </div>
                 </Modal>
 
