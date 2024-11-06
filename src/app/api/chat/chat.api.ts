@@ -1,5 +1,5 @@
 // /src/app/api/chat/chat.api.ts
-import EventSourcePolyfill from 'event-source-polyfill';
+import {EventSourcePolyfill} from 'event-source-polyfill';
 
 let token: string | null = null;
 
@@ -94,7 +94,7 @@ export const getNotReadParticipantsCount = async (chatId: string): Promise<numbe
 // 메시지를 읽음으로 표시하는 API
 export const markMessageAsRead = async (chatId: string, nickname: string): Promise<any> => {
   const response = await fetch(`http://localhost:8081/api/chats/${chatId}/read/${nickname}`, {
-    method: 'PATCH',
+    method: 'PUT',
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",

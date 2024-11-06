@@ -9,7 +9,7 @@ import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src
 import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
 import { ChatRoomModel } from "src/app/model/chatRoom.model";
 import { ChatModel } from "src/app/model/chat.model";
-import { getUnreadCount, markMessageAsRead } from "src/app/api/chat/chat.api";
+import { getUnreadCount, markMessageAsRead, subscribeToChats } from "src/app/api/chat/chat.api";
 import React from "react";
 import { ChatRooms } from "@/app/components/ChatRooms";
 
@@ -35,11 +35,11 @@ export default function Home1() {
 
     // 변환 후에도 유효한 날짜인지 확인
     if (!validDate || isNaN(validDate.getTime())) {
-      return 'Invalid Date';
+        return 'Invalid Date';
     }
 
     return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(validDate);
-  };
+};
 
 
   // 채팅방 정보와 메시지를 로딩하는 useEffect
@@ -102,21 +102,55 @@ export default function Home1() {
     fetchUnreadCounts();
   }, [sender, chatRooms]);
 
-  // 메시지 스트리밍 및 읽음 상태 처리
+  // 선택된 채팅방의 메시지를 가져오고 읽음 상태 처리하기
   useEffect(() => {
     if (!selectedChatRoomId) return;
 
-    const eventSource = new EventSource(`http://localhost:8081/api/chats/${selectedChatRoomId}`);
+    // 채팅방 정보 가져오기
+    getChatRoomDetails(selectedChatRoomId)
+      .then((data) => {
+        setSelectedChatRoom(data);
+        setMessages(data.messages || []); // 초기 메시지 설정
+        setUnreadCount(0); // 채팅방 열 때 unreadCount를 0으로 설정
 
-    eventSource.onmessage = async (event) => {
-      const newMessage = JSON.parse(event.data);
+        // 읽지 않은 메시지 수를 0으로 설정
+        setChatRooms((prevRooms) =>
+          prevRooms.map((room) =>
+            room.id === selectedChatRoomId ? { ...room, unreadCount: 0 } : room
+          )
+        );
+
+        // 채팅방에 있는 모든 메시지를 읽음으로 마킹 처리
+        data.messages.forEach((message) => {
+          const isRead = message.readBy ? message.readBy[sender] : false; // null 체크
+          if (!isRead) {
+            markMessageAsRead(message.id, sender)
+              .then(() => {
+                // 읽음 상태 업데이트
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === message.id
+                      ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
+                      : msg
+                  )
+                );
+              })
+              .catch((error) => console.error('Failed to mark message as read:', error));
+          }
+        });
+      })
+      .catch((error) => console.error(error));
+
+    // 메시지 스트리밍 구독
+    const unsubscribe = subscribeToChats(selectedChatRoomId, (newMessage) => {
       setMessages((prevMessages) => {
+        // 새 메시지가 이미 존재하는지 확인
         const messageExists = prevMessages.some(msg => msg.id === newMessage.id);
         if (!messageExists) {
           // 새 메시지를 기존 메시지 목록에 추가
           const updatedMessages = [...prevMessages, newMessage];
 
-          // 메시지를 읽음으로 마킹 처리
+          // 새 메시지를 읽음으로 마킹 처리
           const isRead = newMessage.readBy ? newMessage.readBy[sender] : false; // null 체크
           if (!isRead) {
             markMessageAsRead(newMessage.id, sender)
@@ -145,15 +179,10 @@ export default function Home1() {
         }
         return prevMessages; // 메시지가 이미 존재하면 상태를 그대로 반환
       });
-    };
-
-    eventSource.onerror = (event) => {
-      console.error("EventSource 에러:", event);
-      eventSource.close();
-    };
+    });
 
     return () => {
-      eventSource.close(); // 컴포넌트 언마운트 시 EventSource 닫기
+      unsubscribe(); // 컴포넌트 언마운트 시 구독 취소
     };
   }, [selectedChatRoomId]);
 
@@ -407,50 +436,107 @@ export default function Home1() {
                           marginBottom: '8px',
                         }}
                       >
-                        {/* 안 읽은 사람 수와 시간 표시 (상대방 메시지의 경우 왼쪽, 내 메시지의 경우도 왼쪽) */}
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            paddingRight: msg.sender === sender ? '8px' : '0px',
-                            paddingLeft: msg.sender !== sender ? '8px' : '0px',
-                            color: '#9E9E9E',
-                          }}
-                        >
-                          {countNotReadParticipants(msg) > 0 && (
-                            <span style={{ color: '#FFD700', fontSize: '0.8em', textAlign: 'center' }}>
-                              {countNotReadParticipants(msg)}
-                            </span>
-                          )}
-                          <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
-                            {formatTime(new Date(msg.createdAt))}
-                          </span>
-                        </div>
+                        {/* 보낸 사람이 본인일 경우: 가장 오른쪽에 메시지가 있고, 나머지 정보는 왼쪽에 */}
+                        {msg.sender === sender ? (
+                          <>
+                            {/* 나머지 정보 (시간 및 unread 수) */}
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                paddingLeft: '8px',
+                                paddingTop: '4px', // 약간의 여백을 추가
+                                color: '#9E9E9E',
+                                justifyContent: 'space-between', // 빈 공간을 날짜와 unread 사이에 균등하게 배치
+                                height: '40px',  // 높이를 고정하여 위치 변경을 방지
+                              }}
+                            >
+                              <span
+                                style={{
+                                  visibility: countNotReadParticipants(msg) > 0 ? 'visible' : 'hidden',
+                                  color: '#FFD700',
+                                  fontSize: '0.8em',
+                                  textAlign: 'left',
+                                }}
+                              >
+                                {countNotReadParticipants(msg)}
+                              </span>
+                              <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
+                                {formatTime(new Date(msg.createdAt))}
+                              </span>
+                            </div>
 
-                        {/* 메시지 내용 박스 */}
-                        <div
-                          className="message-box"
-                          style={{
-                            maxWidth: '70%',
-                            padding: '8px 12px',
-                            borderRadius: '10px',
-                            backgroundColor: msg.sender === sender ? '#d1e7ff' : '#f1f1f1',
-                            textAlign: msg.sender === sender ? 'right' : 'left',
-                          }}
-                        >
-                          <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
-                        </div>
+                            {/* 메시지 내용 박스 */}
+                            <div
+                              className="message-box"
+                              style={{
+                                maxWidth: '70%',
+                                padding: '8px 12px',
+                                borderRadius: '10px',
+                                backgroundColor: '#d1e7ff',
+                                textAlign: 'right',
+                              }}
+                            >
+                              <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
+                            </div>
+                          </>
+                        ) : (
+                          // 상대방이 보낸 메시지의 경우: 왼쪽에 닉네임, 메시지, 나머지 정보
+                          <>
+                            {/* 상대방 메시지의 경우 왼쪽에 닉네임 */}
+                            <div style={{ paddingRight: '8px', alignSelf: 'center', color: '#2c3e50', fontWeight: 'bold', fontSize: '0.8em' }}>
+                              {msg.sender}
+                            </div>
 
-                        {/* 오른쪽에 유저 닉네임 (상대방 메시지의 경우에만 오른쪽에 표시) */}
-                        {msg.sender !== sender && (
-                          <div style={{ paddingLeft: '8px', alignSelf: 'center', color: '#2c3e50', fontWeight: 'bold', fontSize: '0.8em' }}>
-                            {msg.sender}
-                          </div>
+                            {/* 메시지 내용 박스 */}
+                            <div
+                              className="message-box"
+                              style={{
+                                maxWidth: '70%',
+                                padding: '8px 12px',
+                                borderRadius: '10px',
+                                backgroundColor: '#f1f1f1',
+                                textAlign: 'left',
+                              }}
+                            >
+                              <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
+                            </div>
+
+                            {/* 나머지 정보 (시간 및 unread 수) */}
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                paddingLeft: '8px',
+                                paddingTop: '4px', // 약간의 여백을 추가
+                                color: '#9E9E9E',
+                                justifyContent: 'space-between', // 빈 공간을 날짜와 unread 사이에 균등하게 배치
+                                height: '40px',  // 높이를 고정하여 위치 변경을 방지
+                              }}
+                            >
+                              <span
+                                style={{
+                                  visibility: countNotReadParticipants(msg) > 0 ? 'visible' : 'hidden',
+                                  color: '#FFD700',
+                                  fontSize: '0.8em',
+                                  textAlign: 'left',
+                                }}
+                              >
+                                {countNotReadParticipants(msg)}
+                              </span>
+                              <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
+                                {formatTime(new Date(msg.createdAt))}
+                              </span>
+                            </div>
+
+                          </>
                         )}
                       </div>
                     ))}
                   </div>
+
                   <div className="chat-messages-footer bg-gray-100 p-4 rounded-b-lg">
                     <form onSubmit={sendMessage} className="chat-messages-form flex">
                       <button
