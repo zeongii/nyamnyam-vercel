@@ -1,11 +1,11 @@
 // /src/app/api/chat/chat.api.ts
-import EventSourcePolyfill from 'event-source-polyfill';
+import {EventSourcePolyfill} from 'event-source-polyfill';
 
 let token: string | null = null;
 
 if (typeof window !== "undefined") {
-  // 브라우저 환경에서만 localStorage 접근
-  token = localStorage.getItem('token');
+    // 브라우저 환경에서만 localStorage 접근
+    token = localStorage.getItem('token');
 }
 // 채팅 메시지 스트리밍 API
 export const subscribeToChats = (chatRoomId: any, onMessageReceived: (arg0: any) => void) => {
@@ -14,7 +14,7 @@ export const subscribeToChats = (chatRoomId: any, onMessageReceived: (arg0: any)
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-    },
+  },
     withCredentials: true,
   });
 
@@ -41,7 +41,7 @@ export const sendChat = async (chatRoomId: any, chat: any) => {
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-    },
+  },
     body: JSON.stringify(chat),
   });
 
@@ -62,7 +62,7 @@ export const getUnreadCount = async (chatRoomId: string, nickname: string): Prom
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-    },
+  },
   });
 
   if (!response.ok) {
@@ -80,7 +80,7 @@ export const getNotReadParticipantsCount = async (chatId: string): Promise<numbe
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-    },
+  },
   });
 
   if (!response.ok) {
@@ -94,11 +94,11 @@ export const getNotReadParticipantsCount = async (chatId: string): Promise<numbe
 // 메시지를 읽음으로 표시하는 API
 export const markMessageAsRead = async (chatId: string, nickname: string): Promise<any> => {
   const response = await fetch(`http://localhost:8081/api/chats/${chatId}/read/${nickname}`, {
-    method: 'PATCH',
+    method: 'PUT',
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-    },
+  },
   });
 
   if (!response.ok) {
@@ -117,7 +117,7 @@ export const updateReadBy = async (chatId: string, nickname: string): Promise<an
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-    },
+  },
   });
 
   if (!response.ok) {

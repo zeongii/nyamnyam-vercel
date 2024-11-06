@@ -8,7 +8,9 @@ import { fetchDeleteFollow, fetchIsFollow, fetchRegisterFollow } from "@/app/ser
 import { FollowModel } from "@/app/model/follow.model";
 import { insertChatRoom } from '@/app/service/chatRoom/chatRoom.api';
 import { useRouter } from 'next/navigation';
-import {fetchUserById} from "@/app/api/user/user.api";
+import { fetchUserById } from "@/app/api/user/user.api";
+import { Modal } from 'react-bootstrap';
+import { checkChatRoom } from '@/app/api/chatRoom/chatRoom.api';
 
 interface AccountProps {
     selectUser: User;
@@ -22,6 +24,8 @@ export default function Account(selectUser: Partial<AccountProps>) {
 
     const cookie = nookies.get();
     const userId = cookie.userId;
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -78,31 +82,37 @@ export default function Account(selectUser: Partial<AccountProps>) {
         }
     };
 
-    const handleCreateChatRoom = async (e: React.FormEvent) => {
-        e.preventDefault(); // 페이지 새로고침 방지
 
-        // ChatRoom 객체 생성
+    const handleCreateRoom = () => {
+        setAlertMessage("채팅방이 생성되었습니다.");
+        setAlertOpen(true);
+    };
+    const handleCreateChatRoom = async (e: React.FormEvent) => {
+        e.preventDefault();
+
         const newChatRoom: any = {
-            name: "님과의 채팅방", // 입력된 채팅방 이름
-            participants: [selectedUser.nickname, selectUser.selectUser.nickname], // 초기 참가자 목록에 입력된 참가자 추가
+            name: "님과의 채팅방",
+            participants: [user.nickname, selectedUser.nickname],
         };
 
-        // 참가자 목록 체크
-        const participantsList = newChatRoom.participants.length > 0
-            ? newChatRoom.participants.join(", ")
-            : "참가자가 없습니다"; // 참가자가 없을 경우 기본 메시지
+        const checkResult = await checkChatRoom(newChatRoom);
 
-        const result = await insertChatRoom(newChatRoom);
-        console.log(result);
-        if (result.status === 200) {
-            alert("채팅방이 성공적으로 생성되었습니다.");
-            // 채팅방 정보를 URL 쿼리 파라미터로 전달
-            const createdChatRoom = result.data;
-            console.log(createdChatRoom);
-            router.push(`/chatRoom?id=${createdChatRoom.id}`); // 생성된 채팅방의 ID와 이름을 쿼리로 전달
+        if (checkResult.status === 200 && checkResult.data) {
+            const existingChatRoom = checkResult.data;
+            const id = existingChatRoom.id;
+            router.push(`/chatRoom/${id}`);
+        } else {
+            const createResult = await insertChatRoom(newChatRoom);
+
+
+            if (createResult.status === 200 && createResult.data) {
+                const createdChatRoom = createResult.data;
+                const id = createdChatRoom.id;
+                router.push(`/chatRoom/${id}`);
+            } else {
+                console.error("채팅방 생성 실패", createResult);
+            }
         }
-
-
     };
 
 
@@ -138,7 +148,7 @@ export default function Account(selectUser: Partial<AccountProps>) {
                     selectUser.selectUser?.id === userId ? (
                         <Link href="/user/follow" passHref>
                             <button type="submit"
-                                    className="px-4 py-2 bg-[#41B3A3] text-white rounded hover:bg-[#178E7F]">
+                                className="px-4 py-2 bg-[#41B3A3] text-white rounded hover:bg-[#178E7F]">
                                 팔로우
                             </button>
                         </Link>
@@ -150,19 +160,30 @@ export default function Account(selectUser: Partial<AccountProps>) {
                         </button>
                     ) : (
                         <button onClick={handleFollow}
-                                className="px-4 py-2 bg-[#41B3A3] text-white rounded hover:bg-[#178E7F]">
+                            className="px-4 py-2 bg-[#41B3A3] text-white rounded hover:bg-[#178E7F]">
                             팔로우하기
                         </button>
                     )
                 }
                 <button
                     className="px-4 py-2 ml-4 bg-[#3A9181] text-white rounded hover:bg-[#2C7365]"
-                    onClick={handleCreateChatRoom} // 버튼 클릭 시 함수 실행
+                    onClick={handleCreateRoom} // 버튼 클릭 시 함수 실행
                 >
                     채팅하기
                 </button>
-
+                <Modal isOpen={alertOpen} onClose={() => setAlertOpen(false)}>
+                    <div className="p-4 text-center mt-5">
+                        <h3 className="font-semibold text-lg">{alertMessage}</h3>
+                        <button
+                            className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition duration-200 mr-4" // 오른쪽에 간격 추가
+                            onClick={handleCreateChatRoom}
+                        >
+                            확인
+                        </button>
+                    </div>
+                </Modal>
             </div>
         </div>
     );
 }
+
