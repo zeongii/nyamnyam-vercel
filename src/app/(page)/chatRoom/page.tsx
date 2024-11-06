@@ -103,7 +103,7 @@ export default function Home1() {
         getChatRoomDetails(selectedChatRoomId)
             .then((data) => {
                 setSelectedChatRoom(data);
-                setMessages(data.messages || []); // 초기 메시지 설정
+                setMessages(data.messages || []); // 초기 메시지 설정 (null일 경우 빈 배열로 설정)
                 setUnreadCount(0); // 채팅방 열 때 unreadCount를 0으로 설정
 
                 // 읽지 않은 메시지 수를 0으로 설정
@@ -113,24 +113,26 @@ export default function Home1() {
                     )
                 );
 
-                // 채팅방에 있는 모든 메시지를 읽음으로 마킹 처리
-                data.messages.forEach((message) => {
-                    const isRead = message.readBy ? message.readBy[sender] : false; // null 체크
-                    if (!isRead) {
-                        markMessageAsRead(message.id, sender)
-                            .then(() => {
-                                // 읽음 상태 업데이트
-                                setMessages((prev) =>
-                                    prev.map((msg) =>
-                                        msg.id === message.id
-                                            ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
-                                            : msg
-                                    )
-                                );
-                            })
-                            .catch((error) => console.error('Failed to mark message as read:', error));
-                    }
-                });
+                // data.messages가 null이 아닐 때만 처리
+                if (data.messages && Array.isArray(data.messages)) {
+                    data.messages.forEach((message) => {
+                        const isRead = message.readBy ? message.readBy[sender] : false; // null 체크
+                        if (!isRead) {
+                            markMessageAsRead(message.id, sender)
+                                .then(() => {
+                                    // 읽음 상태 업데이트
+                                    setMessages((prev) =>
+                                        prev.map((msg) =>
+                                            msg.id === message.id
+                                                ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
+                                                : msg
+                                        )
+                                    );
+                                })
+                                .catch((error) => console.error('Failed to mark message as read:', error));
+                        }
+                    });
+                }
             })
             .catch((error) => console.error(error));
 
@@ -178,6 +180,7 @@ export default function Home1() {
             unsubscribe(); // 컴포넌트 언마운트 시 구독 취소
         };
     }, [selectedChatRoomId]);
+
 
 
 
