@@ -84,61 +84,82 @@ const UserTable = ({ users = [] }) => {
 
     return (
         <div className="list overflow-x-auto w-full mt-5">
-            <table className="w-full max-[1400px]:w-[700px] max-md:w-[700px]">
-                <thead className="border-b border-line">
-                <tr>
-                    <th scope="col" className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
-                        username
-                    </th>
-                    <th scope="col" className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
-                        nickname
-                    </th>
-                    <th scope="col" className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap" onClick={() => handleSort('role')}>
-                        role
-                    </th>
-                    <th scope="col" className="pb-3 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap" onClick={() => handleSort('score')}>
-                        score
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {currentUsers.map((u) => (
-                    <tr className="item duration-300 border-b border-line" key={u.username} onClick={() => openModal(u)}>
-                        <th scope="row" className="py-3 text-left">
-                            <strong className="text-title cursor-pointer">{u.username}</strong>
+            <div className="list overflow-x-auto w-full mt-5">
+                <table className="w-full max-[1400px]:w-[700px] max-md:w-[700px]">
+                    <thead className="border-b border-line text-center">
+                    <tr>
+                        <th scope="col" className="pb-3 text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                            username
                         </th>
-                        <td className="py-3 cursor-pointer">
-                            <div className="info flex flex-col">
-                                <strong className="product_name text-button">{u.nickname}</strong>
-                            </div>
-                        </td>
-                        <td className="py-3 price">{u.role}</td>
-                        <td className="py-3 text-right">
-                                <span className={`tag px-4 py-1.5 rounded-full bg-opacity-10 ${u.score < 40 ? 'bg-sky-500 text-sky-500' :
-                                    u.score < 50 ? 'bg-green-400 text-green-400' :
-                                        u.score < 60 ? 'bg-yellow-500 text-yellow-500' :
-                                            u.score < 80 ? 'bg-orange-400 text-orange-400' :
-                                                u.score < 100 ? 'bg-red-500 text-red-500' :
-                                                    'bg-gray text-gray'} caption1 font-semibold`}>
-                                    {u.score}
-                                </span>
-                        </td>
+                        <th scope="col" className="pb-3 text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                            nickname
+                        </th>
+                        <th
+                            scope="col"
+                            className="pb-3 text-sm font-bold uppercase text-secondary whitespace-nowrap cursor-pointer select-none"
+                            onClick={(e) => {
+                                e.stopPropagation(); // 클릭 시 다른 동작에 영향 없도록 설정
+                                handleSort('role');
+                            }}
+                        >
+                            role
+                        </th>
+                        <th
+                            scope="col"
+                            className="pb-3 text-sm font-bold uppercase text-secondary whitespace-nowrap cursor-pointer select-none"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleSort('score');
+                            }}
+                        >
+                            score
+                        </th>
                     </tr>
-                ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="text-center">
+                    {currentUsers.map((u) => (
+                        <tr className="item duration-300 border-b border-line" key={u.username}
+                            onClick={() => openModal(u)}>
+                            <th scope="row" className="py-3">
+                                <strong className="text-title cursor-pointer">{u.username}</strong>
+                            </th>
+                            <td className="py-3 cursor-pointer">
+                                <div className="info flex flex-col">
+                                    <strong className="product_name text-button">{u.nickname}</strong>
+                                </div>
+                            </td>
+                            <td className="py-3 price">{u.role}</td>
+                            <td className="py-3">
+                        <span
+                            className={`tag px-4 py-1.5 rounded-full bg-opacity-10 ${u.score < 40 ? 'bg-sky-500 text-sky-500' :
+                                u.score < 50 ? 'bg-green-400 text-green-400' :
+                                    u.score < 60 ? 'bg-yellow-500 text-yellow-500' :
+                                        u.score < 80 ? 'bg-orange-400 text-orange-400' :
+                                            u.score < 100 ? 'bg-red-500 text-red-500' :
+                                                'bg-gray text-gray'} caption1 font-semibold`}>
+                            {u.score}
+                        </span>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+
             <div className="pagination mt-4 flex justify-between">
-                <button onClick={handlePrevious} disabled={currentPage === 1} className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
+                <button onClick={handlePrevious} disabled={currentPage === 1}
+                        className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
                     이전
                 </button>
                 <span>페이지 {currentPage} / {totalPages}</span>
-                <button onClick={handleNext} disabled={currentPage === totalPages} className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
+                <button onClick={handleNext} disabled={currentPage === totalPages}
+                        className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
                     다음
                 </button>
             </div>
 
             <Modal isOpen={isModalOpen} onClose={closeModal}>
-                {selectedUser && <Account selectUser={selectedUser} />}
+                {selectedUser && <Account selectUser={selectedUser}/>}
             </Modal>
         </div>
     );
@@ -157,7 +178,7 @@ export default function UserList() {
 
     return (
         <div>
-            <UserTable users={user} />
+            <UserTable users={user}/>
         </div>
     );
 }

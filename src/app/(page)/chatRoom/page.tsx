@@ -1,17 +1,16 @@
 "use client";
 
 import Head from "next/head";
+import Link from "next/link";
 import Image from 'next/image';
-import EmojiPicker from "src/app/components/EmojiPicker";
 import { useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
-import { Suspense, useEffect, useRef, useState } from "react";
-import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src/app/service/chatRoom/chatRoom.api";
+import { useEffect, useState } from "react";
+import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails, insertChatRoom } from "src/app/service/chatRoom/chatRoom.api";
 import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
 import { ChatRoomModel } from "src/app/model/chatRoom.model";
 import { ChatModel } from "src/app/model/chat.model";
-import { getUnreadCount, markMessageAsRead } from "src/app/api/chat/chat.api";
-import React from "react";
-import { ChatRooms } from "@/app/components/ChatRooms";
+import { getNotReadParticipantsCount, getUnreadCount, markMessageAsRead, updateReadBy } from "src/app/api/chat/chat.api";
+import dynamic from "next/dynamic"; // Next.js의 dynamic import 사용
 
 export default function Home1() {
     const [chatRooms, setChatRooms] = useState<ChatRoomModel[]>([]);
@@ -22,36 +21,24 @@ export default function Home1() {
     const [messages, setMessages] = useState<ChatModel[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-    const emojiPickerRef = useRef(null);
+
     const [sender, setSender] = useState<string>(""); // 사용자 ID
     const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
+    const [notReadParticipantsCount, setNotReadParticipantsCount] = useState<number>(0); // 읽지 않은 참가자 수
     const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
+    const [user, setUser] = useState(null);
+    const [chatRoomName, setChatRoomName] = useState<string>(""); // 채팅방 이름
+    const [newParticipantName, setNewParticipantName] = useState<string>(""); // 입력받은 참가자 이름
     const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
 
-    const formatTime = (date) => {
-        // date가 문자열이라면 Date 객체로 변환
-        const validDate = (typeof date === 'string' || date instanceof Date) ? new Date(date) : null;
-    
-        // 변환 후에도 유효한 날짜인지 확인
-        if (!validDate || isNaN(validDate.getTime())) {
-            return 'Invalid Date';
-        }
-    
-        return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(validDate);
-    };
-    
-
-
-
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const nickname = localStorage.getItem('nickname');
-            if (nickname) {
-                setSender(nickname);
-                fetchData(nickname); // 기본 데이터 로딩
-            }
+        const nickname = localStorage.getItem('nickname')
+        if (nickname) {
+            setSender(nickname); // 로그인된 사용자의 닉네임으로 sender 초기화
+            fetchData(nickname);
         }
-    }, []); // selectedChatRoomId를 제거
+
+    }, []);
 
 
     const fetchData = async (nickname: string) => {
@@ -116,7 +103,7 @@ export default function Home1() {
             .catch((error) => console.error(error));
 
         // 메시지 스트리밍 구독
-        const eventSource = new EventSource(`https://abc.nyamnyam.kr/api/chats/${selectedChatRoomId}`);
+        const eventSource = new EventSource(`http://localhost:8080/api/chats/${selectedChatRoomId}`);
 
         eventSource.onmessage = async (event) => {
             const newMessage = JSON.parse(event.data);
@@ -195,42 +182,14 @@ export default function Home1() {
         }
     };
 
-    // 이모지 선택창 표시/숨김 토글 함수
-    const toggleEmojiPicker = () => {
-        setShowEmojiPicker((prev) => !prev);
-
-    };
-    // 외부 클릭 시 이모지 선택창 닫기
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
-                setShowEmojiPicker(false); // 선택창 닫기
-            }
-        }
-
-        // 클릭 이벤트 리스너 추가
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            // 컴포넌트 언마운트 시 이벤트 리스너 제거
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
-
-    // 이모티콘 선택 핸들러 함수
-    const handleEmojiSelect = (emoji: string) => {
-        setNewMessage((prevMessage) => prevMessage + emoji);
-    };
-
-
-    const handleDelete = async (nickname) => {
+    const handleDelete = async () => {
         if (selectChatRooms.length === 0) {
             alert("삭제할 채팅방을 선택해주세요.");
             return;
         }
         if (window.confirm("선택한 채팅방을 삭제하시겠습니까?")) {
             try {
-                await deleteChatRoomsService(selectChatRooms, nickname);
+                await deleteChatRoomsService(selectChatRooms);
                 alert("채팅방이 삭제되었습니다.");
                 setChatRooms(prevChatRooms =>
                     prevChatRooms.filter(room => !selectChatRooms.includes(room.id))
@@ -243,16 +202,20 @@ export default function Home1() {
         }
     };
 
-    const filteredChatRooms = chatRooms.filter((room) => {
-        // 참가자 목록을 소문자로 변환하여 하나의 문자열로 합침
-        const participantsStr = room.participants.join(' ').toLowerCase();
+    const filteredChatRooms = chatRooms.filter((room) =>
+        room.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-        // 채팅방 이름과 참가자 목록에서 검색어가 포함된 항목을 필터링
-        return (
-            room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            participantsStr.includes(searchTerm.toLowerCase())
+    //===========================================여기 까지 serviceInsertReply,api 끝!!!!=============================================
+
+    const handleCheck = (roomId: string) => {
+        // 선택된 채팅방 ID가 이미 배열에 존재하면 제거, 없으면 추가
+        setSelectChatRooms((prevSelectedRooms) =>
+            prevSelectedRooms.includes(roomId)
+                ? prevSelectedRooms.filter((id) => id !== roomId)
+                : [...prevSelectedRooms, roomId]
         );
-    });
+    };
 
     return (
         <>
@@ -277,48 +240,46 @@ export default function Home1() {
             </Head>
             <main className="page-main">
                 <h3 className="uk-text-lead">Chats</h3>
+
+                <div className="chat-room-create">
+                    <div style={{ marginBottom: '20px' }}>
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg"
+                        >
+                            선택한 채팅방 삭제
+                        </button>
+                    </div>
+                </div>
+
                 <div className="uk-grid uk-grid-small" data-uk-grid>
                     <div className="uk-width-1-3@l">
                         <div className="chat-user-list">
-                            <div className="chat-user-list__box" style={{ width: '90%', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '16px', backgroundColor: '#F9F9F9', height: '900px', overflowY: 'auto' }}>
-                                {/* Header */}
-                                <div className="chat-user-list__head" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                            <div className="chat-user-list__box" style={{ width: '90%' }}>
+                                <div className="chat-user-list__head">
                                     <div className="avatar">
-                                        <Image src="/assets/img/profile.png" alt="profile" width={40} height={40} style={{ borderRadius: '50%' }} />
-                                    </div>
-                                    <h2 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 'bold', color: '#4A4A4A' }}>Chat Rooms</h2>
-                                </div>
-                                <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} /> {/* 구분선 추가 */}
-
-                                {/* Search */}
-                                <div className="chat-user-list__search" style={{ marginBottom: '8px' }}>
-                                    <div className="search" style={{ position: 'relative' }}>
-                                        <i className="ico_search" style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', color: '#888' }}></i>
-                                        <input
-                                            type="search"
-                                            name="search"
-                                            placeholder="Search"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px 12px 10px 36px',
-                                                borderRadius: '24px',
-                                                border: '1px solid #ddd',
-                                                fontSize: '14px',
-                                                outline: 'none',
-                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                                            }}
-                                        />
+                                        <Image src="/assets/img/profile.png" alt="profile" width={40} height={40} />
                                     </div>
                                 </div>
-                                <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} /> {/* 구분선 추가 */}
-
-                                {/* Chat Room List */}
+                                <div className="chat-user-list__search">
+                                    <div className="search">
+                                        <div className="search__input">
+                                            <i className="ico_search"></i>
+                                            <input
+                                                type="search"
+                                                name="search"
+                                                placeholder="Search"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="chat-user-list__body">
-                                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                        {filteredChatRooms.map((room, index) => {
-                                            const currentUserNickname = localStorage.getItem('nickname'); // 로그인한 유저의 닉네임
+                                    <ul>
+                                        {filteredChatRooms.map((room) => {
+                                            const currentUserNickname = "kidon"; // 로그인한 유저의 닉네임
 
                                             // 로그인한 사용자 닉네임을 제외한 참가자 목록 생성
                                             const otherParticipants = room.participants.filter(participant => participant !== currentUserNickname);
@@ -327,54 +288,54 @@ export default function Home1() {
                                             const otherParticipantsStr = otherParticipants.length > 0 ? otherParticipants.join(', ') : "No Participants";
 
                                             return (
-                                                <React.Fragment key={room.id}>
-                                                    <li>
-                                                        <div className="user-item --active" style={{ padding: '10px 0', backgroundColor: '#FFFFFF', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
-                                                            <div className="user-item__avatar">
-                                                                <Image src="/assets/img/user-list-1.png" alt="user" width={40} height={40} style={{ borderRadius: '50%' }} />
-                                                            </div>
-                                                            <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginLeft: '10px' }}>
-                                                                <a
-                                                                    href="#"
-                                                                    onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        if (room && room.id) {
-                                                                            setSelectedChatRoomId(room.id);
-                                                                        }
-                                                                    }}
-                                                                    style={{ textDecoration: 'none', color: '#4A4A4A', flexGrow: 2, fontSize: '16px' }}
-                                                                >
-                                                                    <div className="user-item__name">
-                                                                        {/* 참가자 이름 출력 */}
-                                                                        {`${otherParticipantsStr} ${room.name}`}
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                            <div className="user-item__info" style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                                                <span
-                                                                    style={{
-                                                                        display: room.unreadCount > 0 ? 'inline-block' : 'none', // 0 이하일 때 숨김 처리
-                                                                        backgroundColor: 'red',
-                                                                        color: 'white',
-                                                                        padding: '2px 8px',
-                                                                        borderRadius: '6px', // 사각형 느낌을 더 주기 위해 값 감소
-                                                                        fontSize: '12px',
-                                                                        fontWeight: 'bold',
-                                                                        minWidth: '20px', // 최소 너비 설정
-                                                                        textAlign: 'center',
-                                                                        marginRight: '10px' // 배지와 체크박스 간의 간격 추가
-                                                                    }}
-                                                                >
-                                                                    {room.unreadCount}
-                                                                </span>
-                                                                <ChatRooms
-                                                                    chatRoomId={room.id}
-                                                                    nickname={localStorage.getItem('nickname')}
-                                                                />
+                                                <li key={room.id}>
+                                                    <div className="user-item --active">
+                                                        <div className="user-item__avatar">
+                                                            <Image src="/assets/img/user-list-1.png" alt="user" width={40} height={40} />
+                                                        </div>
+                                                        <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                                            <a
+                                                                href="#"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    if (room && room.id) {
+                                                                        setSelectedChatRoomId(room.id);
+                                                                    }
+                                                                }}
+                                                                style={{ textDecoration: 'none', color: 'inherit', flexGrow: 2, marginRight: '10px' }}
+                                                            >
+                                                                <div className="user-item__name">
+                                                                    {/* 참가자 이름 출력 */}
+                                                                    {`${otherParticipantsStr} ${room.name}`}
+                                                                </div>
+                                                            </a>
+                                                            <div style={{ flexGrow: 1, flexShrink: 1, textAlign: 'right', marginRight: '10px', maxWidth: '150px' }}>
+                                                                {room.participants && room.participants.length > 0 ? (
+                                                                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                                                                        {room.participants.map((participant: string, index: number) => (
+                                                                            <li key={index} style={{ marginLeft: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: '100%', width: 'auto' }}>
+                                                                                {participant || "No Nickname"}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                ) : (
+                                                                    "No Participants"
+                                                                )}
                                                             </div>
                                                         </div>
-                                                    </li>
-                                                </React.Fragment>
+                                                        <div className="user-item__info" style={{ marginLeft: 'auto' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectChatRooms.includes(room.id)}
+                                                                onChange={(e) => handleCheck(room.id)}
+                                                            />
+                                                            {/* 안 읽은 메시지 수 표시 */}
+                                                            <span style={{ marginLeft: '5px', color: 'red' }}>
+                                {room.unreadCount < 0 ? 0 : room.unreadCount} unread
+                              </span>
+                                                        </div>
+                                                    </div>
+                                                </li>
                                             );
                                         })}
                                     </ul>
@@ -382,6 +343,7 @@ export default function Home1() {
                             </div>
                         </div>
                     </div>
+
                     <div className="uk-width-2-3@l">
                         <div className="chat-messages-box">
                             <div className="chat-messages-head">
@@ -392,12 +354,7 @@ export default function Home1() {
                                         </div>
                                         <div className="user-item__desc" style={{ width: 'full' }}>
                                             <div className="user-item__name" style={{ textAlign: 'center', fontSize: '1.5rem' }}>
-                                                {/* 로그인한 유저 외 다른 참가자 이름과 채팅방 이름을 함께 출력 */}
-                                                {`${filteredChatRooms
-                                                    .find(room => room.id === selectedChatRoomId)
-                                                    ?.participants
-                                                    .filter(participant => participant !== localStorage.getItem('nickname')) // 로그인한 사용자의 닉네임을 제외
-                                                    .join(', ') || "No Participants"} ${filteredChatRooms.find(room => room.id === selectedChatRoomId)?.name || "Unknown Room"}`}
+                                                {filteredChatRooms.find(room => room.id === selectedChatRoomId)?.name || "Unknown Room"}
                                             </div>
                                         </div>
                                     </div>
@@ -426,15 +383,15 @@ export default function Home1() {
                                                     </div>
                                                     <div className="messages-item__text">{msg.message}</div>
                                                     {msg.sender !== sender ? (
-                                                        <div className="messages-item__time text-gray-500 text-xs">{formatTime(new Date(msg.createdAt))}</div>
+                                                        <div className="messages-item__time text-gray-500 text-xs">{new Date(msg.createdAt).toLocaleTimeString()}</div>
                                                     ) : (
-                                                        <div className="messages-item__time text-gray-500 text-xs ml-auto">{formatTime(new Date(msg.createdAt))}</div>
+                                                        <div className="messages-item__time text-gray-500 text-xs ml-auto">{new Date(msg.createdAt).toLocaleTimeString()}</div>
                                                     )}
                                                     {/* 안 읽은 메시지 수 표시 */}
                                                     {countNotReadParticipants(msg) > 0 && (
                                                         <span style={{ color: 'red', fontSize: '0.8em' }}>
-                                                            {countNotReadParticipants(msg)} unread
-                                                        </span>
+                              {countNotReadParticipants(msg)} unread
+                            </span>
                                                     )}
                                                 </div>
                                             </div>
@@ -443,20 +400,6 @@ export default function Home1() {
                                     <div className="chat-messages-footer">
                                         <form onSubmit={sendMessage} className="chat-messages-form flex mt-4">
                                             <div className="chat-messages-form-controls flex-grow">
-                                                <button
-                                                    type="button"
-                                                    onClick={toggleEmojiPicker}
-                                                    className="emoji-picker-button px-2 py-1 rounded-md mr-2 border"
-                                                >
-                                                    😊
-                                                </button>
-
-                                                {showEmojiPicker && (
-                                                    <div ref={emojiPickerRef} className="absolute bottom-16 left-0 z-50">
-                                                        <EmojiPicker onSelectEmoji={handleEmojiSelect} />
-                                                    </div>
-                                                )}
-
                                                 <input
                                                     type="text"
                                                     placeholder="Type your message..."

@@ -36,6 +36,7 @@ export default function MyPage() {
     const [follower, setFollower] = useState<FollowModel[]>([]);
     const [following, setFollowing] = useState<FollowModel[]>([]);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [mounted, setMounted] = useState<boolean>(false);
 
     const { searchTerm } = useSearchContext();
     const router = useRouter();
@@ -82,6 +83,10 @@ export default function MyPage() {
         };
         follow();
     }, [user]);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
 
 
