@@ -9,7 +9,7 @@ if (typeof window !== "undefined") {
 }
 // 채팅 메시지 스트리밍 API
 export const subscribeToChats = (chatRoomId: any, onMessageReceived: (arg0: any) => void) => {
-  const eventSource = new EventSourcePolyfill(`http://localhost:8080/api/chats/${chatRoomId}`, {
+  const eventSource = new EventSourcePolyfill(`http://localhost:8081/api/chats/${chatRoomId}`, {
     method: "GET",
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -36,7 +36,7 @@ export const subscribeToChats = (chatRoomId: any, onMessageReceived: (arg0: any)
 
 
 export const sendChat = async (chatRoomId: any, chat: any) => {
-  const response = await fetch(`http://localhost:8080/api/chats/${chatRoomId}`, {
+  const response = await fetch(`http://localhost:8081/api/chats/${chatRoomId}`, {
     method: "POST",
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
