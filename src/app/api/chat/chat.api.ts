@@ -57,7 +57,7 @@ export const sendChat = async (chatRoomId: any, chat: any) => {
 
 // 채팅방의 읽지 않은 메시지 수를 조회하는 API
 export const getUnreadCount = async (chatRoomId: string, nickname: string): Promise<number> => {
-  const response = await fetch(`http://localhost:8080/api/chats/${chatRoomId}/unreadCount/${nickname}`, {
+  const response = await fetch(`http://localhost:8081/api/chats/${chatRoomId}/unreadCount/${nickname}`, {
     method: "GET",
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -75,7 +75,7 @@ export const getUnreadCount = async (chatRoomId: string, nickname: string): Prom
 
 // 특정 메시지에서 읽지 않은 참가자 수를 조회하는 API
 export const getNotReadParticipantsCount = async (chatId: string): Promise<number> => {
-  const response = await fetch(`http://localhost:8080/api/chats/${chatId}/notReadParticipantsCount`, {
+  const response = await fetch(`http://localhost:8081/api/chats/${chatId}/notReadParticipantsCount`, {
     method: "GET",
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -93,7 +93,7 @@ export const getNotReadParticipantsCount = async (chatId: string): Promise<numbe
 
 // 메시지를 읽음으로 표시하는 API
 export const markMessageAsRead = async (chatId: string, nickname: string): Promise<any> => {
-  const response = await fetch(`http://localhost:8080/api/chats/${chatId}/read/${nickname}`, {
+  const response = await fetch(`http://localhost:8081/api/chats/${chatId}/read/${nickname}`, {
     method: 'PATCH',
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -112,7 +112,7 @@ export const markMessageAsRead = async (chatId: string, nickname: string): Promi
 
 // 메시지를 읽음으로 표시하는 새로운 API (PUT 메서드 추가)
 export const updateReadBy = async (chatId: string, nickname: string): Promise<any> => {
-  const response = await fetch(`http://localhost:8080/api/chats/${chatId}/read/${nickname}`, {
+  const response = await fetch(`http://localhost:8081/api/chats/${chatId}/read/${nickname}`, {
     method: 'PUT', // 새로 추가된 PUT 메서드
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
