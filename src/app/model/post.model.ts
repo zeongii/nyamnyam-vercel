@@ -16,6 +16,7 @@ export interface PostModel {
   userId: string;
   nickname: string;
   restaurantName?: string
+  enabled: number;
 }
 
 export const initialPost: PostModel = {
@@ -31,6 +32,7 @@ export const initialPost: PostModel = {
   images: [],
   restaurantId: 0,
   userId: '',
-  nickname:''
+  nickname:'',
+  enabled: 0
 }
 
