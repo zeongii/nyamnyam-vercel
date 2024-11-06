@@ -43,6 +43,7 @@ export const modifyUser = async (user: User): Promise<User> => {
     return await updateUser(user);
 };
 
+// 회원가입과 썸네일 업로드를 연계하는 함수
 export const addUser = async (
     username: string,
     password: string,
@@ -52,34 +53,56 @@ export const addUser = async (
     tel: string,
     gender: string,
     thumbnails: File[]
-): Promise<User> => {
-    const user: User = {
-        id: '',
+) => {
+    console.log("Adding user:", { username, password, nickname, name, age, tel, gender });
+
+    const user: Partial<User> = {
         username,
         password,
         nickname,
         name,
-        age: typeof age === 'string' ? parseInt(age) : age,
+        age: Number(age),
         tel,
         gender,
         enabled: true,
-        role: 'user',
-        imgId: null,
+        role: "USER",
         score: 36.5
     };
 
-    if (thumbnails.length > 0) {
-        try {
-            const imgIds = await uploadThumbnailApi(thumbnails);
-            user.imgId = imgIds.length > 0 ? imgIds[0].toString() : null;
-        } catch (error) {
-            console.error('Thumbnail upload failed:', error);
-        }
-    }
+    try {
+        // 사용자 정보만 등록
+        const registeredUser = await registerUser(user);
+        console.log("User registered:", registeredUser);
 
-    return await registerUser(user,thumbnails);
+        // 등록 후 썸네일 업로드
+        if (thumbnails.length > 0) {
+            const thumbnailUrls = await uploadThumbnailApi(registeredUser.id, thumbnails);
+            console.log("Uploaded thumbnail URLs:", thumbnailUrls);
+        }
+
+        return registeredUser;
+    } catch (error) {
+        console.error("Registration failed:", error);
+        throw new Error("Failed to register user");
+    }
 };
 
+
+export const updateUserImgId = async (userId: string, imgId: string) => {
+    const response = await fetch(`http://localhost:8081/api/user/updateImgId`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, imgId }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to update user imgId');
+    }
+
+    console.log("User imgId updated successfully");
+};
 
 // 사용자 로그인 서비스
 export const authenticateUser = async (username: string, password: string): Promise<string> => {

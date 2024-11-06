@@ -14,6 +14,7 @@ export default function Register() {
     const [tel, setTel] = useState('');
     const [gender, setGender] = useState('');
     const [thumbnail, setThumbnail] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null); // 미리보기 URL 상태 추가
 
     const isValidPhoneNumber = (phone: string) => {
         const regex = /^\d{3}-\d{4}-\d{4}$/;
@@ -52,9 +53,17 @@ export default function Register() {
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
-            setThumbnail(event.target.files[0]);
+            const file = event.target.files[0];
+            setThumbnail(file);
+            setPreviewUrl(URL.createObjectURL(file)); // 선택한 이미지의 URL을 미리보기 상태에 설정
         }
     };
+
+    const handleRemoveThumbnail = () => {
+        setThumbnail(null);
+        setPreviewUrl(null);
+    };
+
 
     return (
         <div className="register-block md:py-20 py-10 mt-10" style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: '#f9f9f9' }}>
@@ -152,6 +161,18 @@ export default function Register() {
                                     style={{ display: 'none' }}
                                 />
                                 {thumbnail && <p>{thumbnail.name} 선택됨</p>}
+                                {previewUrl && (
+                                    <div className="mt-3">
+                                        <img src={previewUrl} alt="Thumbnail preview" style={{ width: '100px', height: '100px', borderRadius: '8px' }} />
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveThumbnail}
+                                            className="button-secondary mt-2"
+                                        >
+                                            썸네일 삭제
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <div className="block-button md:mt-7 mt-4">
                                 <button type="submit" className="button-main">Register</button>

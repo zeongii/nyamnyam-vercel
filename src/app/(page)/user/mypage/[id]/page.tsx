@@ -143,13 +143,25 @@ export default function MyPage() {
         try {
             await removeUserById(userId); // 실제 탈퇴 요청
             alert("회원 탈퇴가 완료되었습니다.");
-            router.push("/"); // 탈퇴 후 메인 페이지로 이동
+
+            // 세션 및 로컬 저장소 초기화
+            nookies.destroy(null, "userId");
+            nookies.destroy(null, "token");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("token");
+
+            // 사용자 상태 초기화
+            setUser(null);
+
+            // 메인 페이지로 이동
+            router.push("/");
         } catch (error) {
             console.error("회원 탈퇴 실패:", error);
             alert("회원 탈퇴에 실패했습니다. 다시 시도해주세요.");
         }
         setAlertOpen(false); // Modal 닫기
     };
+
 
     const countData = {
         labels: count.map(item => item.nickname),
@@ -188,7 +200,7 @@ export default function MyPage() {
                                 <div className="heading flex flex-col items-center justify-center">
                                     <div className="avatar">
                                         <Image
-                                            src={user?.thumbnailUrl || '/assets/img/profile.png'}
+                                            src={'/assets/img/profile.png'}
                                             width={300}
                                             height={300}
                                             alt='avatar'

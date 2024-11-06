@@ -56,16 +56,22 @@ export const fetchUserCount = async (): Promise<number> => {
 export const deleteUserById = async (id: string): Promise<void> => {
     const response = await fetch(`http://localhost:8081/api/user/deleteById?id=${id}`, {
         method: 'DELETE',
+        headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+        },
     });
     if (!response.ok) {
         throw new Error('Failed to delete user');
     }
 };
 
+
 export const updateUser = async (user: User): Promise<User> => {
     const response = await fetch(`http://localhost:8081/api/user/update`, {
         method: 'PUT',
         headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(user),
@@ -75,27 +81,6 @@ export const updateUser = async (user: User): Promise<User> => {
     }
     return response.json();
 };
-
-export const registerUser = async (user: User, thumbnails: File[]): Promise<User> => {
-    const formData = new FormData();
-    formData.append('user', new Blob([JSON.stringify(user)], { type: 'application/json' }));
-
-    thumbnails.forEach((thumbnail, index) => {
-        formData.append(`thumbnails`, thumbnail);
-    });
-
-    const response = await fetch(`http://localhost:8081/api/user/join`, {
-        method: 'POST',
-        body: formData,
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to register user');
-    }
-    return response.json();
-};
-
-
 
 export const loginUser = async (username: string, password: string): Promise<string> => {
     const response = await fetch(`http://localhost:8081/api/user/login?username=${username}&password=${password}`, {
@@ -115,10 +100,40 @@ export const loginUser = async (username: string, password: string): Promise<str
         return response.text();
     }
 };
-export const uploadThumbnailApi = async (thumbnails: File[]): Promise<number[]> => {
+
+export const registerUser = async (user: Partial<User>, thumbnails: File[] = []): Promise<User> => {
     const formData = new FormData();
-    thumbnails.forEach(thumbnail => {
-        formData.append('images', thumbnail);
+    formData.append("user", new Blob([JSON.stringify(user)], { type: "application/json" }));
+
+    // 썸네일이 있을 경우에만 추가
+    if (thumbnails.length > 0) {
+        thumbnails.forEach((thumbnail) => {
+            formData.append("thumbnails", thumbnail);
+        });
+    }
+
+    const response = await fetch("http://localhost:8081/api/user/register", {
+        method: "POST",
+        body: formData,
+    });
+
+    console.log("Register user response status:", response.status);
+    console.log("Register user response:", await response.text());
+
+    if (!response.ok) {
+        throw new Error("Failed to register user");
+    }
+    return response.json();
+};
+
+
+// 이미지 파일만 업로드하는 함수
+export const uploadThumbnailApi = async (userId: string, thumbnails: File[]): Promise<string[]> => {
+    const formData = new FormData();
+    formData.append('userId', userId);
+
+    thumbnails.forEach((thumbnail) => {
+        formData.append('files', thumbnail);
     });
 
     const response = await fetch('http://localhost:8081/api/thumbnails/upload', {
@@ -130,9 +145,9 @@ export const uploadThumbnailApi = async (thumbnails: File[]): Promise<number[]> 
         throw new Error('Failed to upload thumbnails');
     }
 
-    const data = await response.json();
-    return data.imgIds;
+    return response.json();
 };
+
 
 export const toggleEnable = async (userId: string, enabled: boolean): Promise<void> => {
     const response = await fetch(`http://localhost:8081/api/user/toggleEnable?userId=${userId}&enabled=${enabled}`, {

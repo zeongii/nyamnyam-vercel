@@ -6,11 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/post/[restaurantId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/post/[restaurantId]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/userList/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/userList/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/mypage/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/mypage/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/register/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/register/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/user/user.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/user/user.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/service/user/user.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/service/user/user.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,12 +37,12 @@
     &quot;assignee&quot;: &quot;JEunseo&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/nyamnyam-kr/nyamnyam-front.git",
-    "accountId": "f71ee5fb-02e6-4e72-be14-f4dbf2e14d4c"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/nyamnyam-kr/nyamnyam-front.git&quot;,
+    &quot;accountId&quot;: &quot;f71ee5fb-02e6-4e72-be14-f4dbf2e14d4c&quot;
   }
-}]]></component>
+}</component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -146,7 +145,7 @@
       <workItem from="1728989962295" duration="171000" />
       <workItem from="1729212065738" duration="6194000" />
       <workItem from="1730774688158" duration="2587000" />
-      <workItem from="1730862709401" duration="10512000" />
+      <workItem from="1730862709401" duration="19141000" />
     </task>
     <servers />
   </component>
