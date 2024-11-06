@@ -35,11 +35,11 @@ export default function Home1() {
 
     // 변환 후에도 유효한 날짜인지 확인
     if (!validDate || isNaN(validDate.getTime())) {
-        return 'Invalid Date';
+      return 'Invalid Date';
     }
 
     return new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(validDate);
-};
+  };
 
 
   // 채팅방 정보와 메시지를 로딩하는 useEffect
@@ -297,7 +297,7 @@ export default function Home1() {
         <div className="uk-grid uk-grid-small" data-uk-grid>
           <div className="uk-width-1-3@l">
             <div className="chat-user-list">
-              <div className="chat-user-list__box" style={{ width: '90%', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '16px', backgroundColor: '#F9F9F9', height: '900px', overflowY: 'auto' }}>
+              <div className="chat-user-list__box" style={{ width: '90%', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '16px', backgroundColor: '#F9F9F9', height: '800px', overflowY: 'auto' }}>
                 {/* Header */}
                 <div className="chat-user-list__head" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                   <div className="avatar">
@@ -400,8 +400,14 @@ export default function Home1() {
             </div>
           </div>
           <div className="uk-width-2-3@l">
-            <div className="chat-messages-box">
-              <div className="chat-messages-head">
+            <div className="chat-box" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 1, margin: 1 }}>
+              <div
+                className="chat-messages-head"
+                style={{
+                  border: '1px solid #E0E0E0',  // 연한 회색 테두리
+                  borderRadius: '8px',          // 테두리 모서리 둥글게
+                }}
+              >
                 {selectedChatRoomId ? (
                   <div className="user-item">
                     <div className="user-item__avatar">
@@ -423,9 +429,18 @@ export default function Home1() {
                   <h3>선택된 채팅방이 없습니다.</h3>
                 )}
               </div>
+
               {selectedChatRoomId ? (
                 <>
-                  <div className="chat-messages-body flex-1 overflow-y-auto p-4 bg-white shadow-md rounded-lg space-y-4">
+                  <div
+                    className="chat-messages-body flex-1 overflow-y-auto bg-white shadow-md rounded-lg space-y-4"
+                    style={{
+                      flexGrow: 1,
+                      padding: 3,  // padding을 0으로 설정하여 간격 없애기
+                      margin: 3,   // 추가적으로 margin도 없애기
+                      backgroundColor: '#F5F5F5'  // 더 연한 주황색 배경색 추가
+                    }}
+                  >
                     {messages.map((msg, index) => (
                       <div
                         key={index}
@@ -436,7 +451,6 @@ export default function Home1() {
                           marginBottom: '8px',
                         }}
                       >
-                        {/* 보낸 사람이 본인일 경우: 가장 오른쪽에 메시지가 있고, 나머지 정보는 왼쪽에 */}
                         {msg.sender === sender ? (
                           <>
                             {/* 나머지 정보 (시간 및 unread 수) */}
@@ -455,7 +469,7 @@ export default function Home1() {
                               <span
                                 style={{
                                   visibility: countNotReadParticipants(msg) > 0 ? 'visible' : 'hidden',
-                                  color: '#FFD700',
+                                  color: '#D18F36',  // #FFECB3과 어울리는 부드러운 금색
                                   fontSize: '0.8em',
                                   textAlign: 'left',
                                 }}
@@ -496,7 +510,7 @@ export default function Home1() {
                                 maxWidth: '70%',
                                 padding: '8px 12px',
                                 borderRadius: '10px',
-                                backgroundColor: '#f1f1f1',
+                                backgroundColor: '#FFECB3',
                                 textAlign: 'left',
                               }}
                             >
@@ -574,6 +588,7 @@ export default function Home1() {
               ) : null}
             </div>
           </div>
+
         </div>
       </main>
     </>
