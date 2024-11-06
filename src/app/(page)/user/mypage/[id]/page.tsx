@@ -188,7 +188,7 @@ export default function MyPage() {
                                 <div className="heading flex flex-col items-center justify-center">
                                     <div className="avatar">
                                         <Image
-                                            src={'/assets/img/profile.png'}
+                                            src={user?.thumbnailUrl || '/assets/img/profile.png'}
                                             width={300}
                                             height={300}
                                             alt='avatar'

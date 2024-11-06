@@ -27,7 +27,7 @@ import { PostListProps } from '@/app/model/props';
 import nookies from 'nookies';
 import {User} from "@/app/model/user.model";
 import Account from "@/app/(page)/user/account/page";
-import {getUserById} from "@/app/service/user/user.service";
+import {getUserById, increaseScore, decreaseScore } from "@/app/service/user/user.service";
 import ReplyHandler from './reply/page';
 
 const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
@@ -215,7 +215,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
         return `${year}년 ${month}월 ${day}일`;
     };
 
-    // 좋아요 & 취소 & count
+// 좋아요 & 취소 & count
     const handleLike = async (postId: number, postUserId: string) => {
         if (postUserId === currentUserId) {
             window.alert("본인의 리뷰에는 좋아요를 누를 수 없어요.");
@@ -229,9 +229,17 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
             setLikeCounts((prevCounts) => ({
                 ...prevCounts,
                 [postId]: (prevCounts[postId] || 0) + result.likeCountDelta,
-            }))
+            }));
+
+            // 좋아요 추가 또는 취소에 따라 점수 업데이트 호출
+            if (result.likeCountDelta > 0) {
+                await increaseScore(postUserId); // 좋아요 추가 시
+            } else {
+                await decreaseScore(postUserId); // 좋아요 취소 시
+            }
         }
     };
+
 
     // 신고하기
     const postReport = async (postId: number) => {

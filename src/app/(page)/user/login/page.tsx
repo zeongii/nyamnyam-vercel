@@ -41,14 +41,22 @@ export default function Home() {
             localStorage.setItem('role', decoded.role);
             localStorage.setItem('score', String(decoded.score));
 
-
             // 홈 페이지로 이동
             router.push("/");
-        } catch (error) {
+        } catch (error: any) {
             console.error('Login failed:', error);
-            setErrorMessage('Invalid username or password');
+
+            if (error.message === "Account is disabled") {
+                setErrorMessage("해당 계정은 차단되었습니다. 관리자에게 문의해 주세요.");
+            } else if (error.message === "Invalid username or password") {
+                setErrorMessage("아이디 또는 비밀번호가 올바르지 않습니다.");
+            } else {
+                setErrorMessage("로그인에 실패했습니다. 다시 시도해 주세요.");
+            }
         }
     };
+
+
 
 
     return (
