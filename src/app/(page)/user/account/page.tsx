@@ -8,6 +8,7 @@ import { fetchDeleteFollow, fetchIsFollow, fetchRegisterFollow } from "@/app/ser
 import { FollowModel } from "@/app/model/follow.model";
 import { checkChatRoom, insertChatRoom } from '@/app/api/chatRoom/chatRoom.api';
 import { useRouter } from 'next/navigation';
+import Modal from '@/app/components/Modal';
 
 interface AccountProps {
     user: User;
@@ -25,9 +26,11 @@ export default function Account(user: Partial<AccountProps>) {
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const cookie = nookies.get();
     const userId = cookie.userId;
-   
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("")
+
     const router = useRouter();  // 페이지 이동을 위한 라우터
-   
+
 
     useEffect(() => {
 
@@ -88,45 +91,39 @@ export default function Account(user: Partial<AccountProps>) {
         }
     };
 
+
+
     const handleCreateChatRoom = async (e: React.FormEvent) => {
-        e.preventDefault(); // 페이지 새로고침 방지
-    
-        // ChatRoom 객체 생성
+        e.preventDefault();
+
         const newChatRoom: any = {
-            name: "님과의 채팅방", // 입력된 채팅방 이름
-            participants: [users.nickname, user.user.nickname], // 초기 참가자 목록에 입력된 참가자 추가
+            name: "님과의 채팅방",
+            participants: [users.nickname, user.user.nickname],
         };
-    
-        // 참가자 목록 체크
-        const participantsList = newChatRoom.participants.length > 0
-            ? newChatRoom.participants.join(", ")
-            : "참가자가 없습니다"; // 참가자가 없을 경우 기본 메시지
-    
-        // 1. 채팅방 체크
+
         const checkResult = await checkChatRoom(newChatRoom);
-    
+
         if (checkResult.status === 200 && checkResult.data) {
-            // 채팅방이 존재하는 경우
             const existingChatRoom = checkResult.data;
-            const id = existingChatRoom.id
-            router.push(`/chatRoom/${id}`); // 기존 채팅방으로 이동
+            const id = existingChatRoom.id;
+            router.push(`/chatRoom/${id}`);
         } else {
-            // 채팅방이 존재하지 않는 경우, 새로운 채팅방 생성
             const createResult = await insertChatRoom(newChatRoom);
-            
+
             if (createResult.status === 200 && createResult.data) {
-                alert("채팅방이 성공적으로 생성되었습니다.");
+                setAlertMessage("채팅방이 생성되었습니다.");
+                setAlertOpen(true);
+
                 const createdChatRoom = createResult.data;
-                const id= createdChatRoom.id
-                console.log(createdChatRoom);
-                router.push(`/chatRoom/${id}`); // 생성된 채팅방으로 이동
+                const id = createdChatRoom.id;
+                router.push(`/chatRoom/${id}`);
             } else {
                 console.error("채팅방 생성 실패", createResult);
-                alert("채팅방 생성 중 오류가 발생했습니다.");
+                setAlertMessage("채팅방 생성 중 오류가 발생했습니다.");
+                setAlertOpen(true);
             }
         }
     };
-
 
     return (
         <div className="w-full lg:pr-[5px] md:pr-[5px]">
@@ -174,10 +171,21 @@ export default function Account(user: Partial<AccountProps>) {
                 }
                 <button
                     className="px-4 py-2 ml-4 bg-[#3A9181] text-white rounded hover:bg-[#2C7365]"
-                    onClick={handleCreateChatRoom} // 버튼 클릭 시 함수 실행
+                    onClick={handleCreateChatRoom}
                 >
                     채팅하기
                 </button>
+                <Modal isOpen={alertOpen} onClose={() => setAlertOpen(false)}>
+                    <div className="p-4 text-center mt-5">
+                        <h3 className="font-semibold text-lg">{alertMessage}</h3>
+                        <button
+                            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
+                            onClick={() => setAlertOpen(false)}
+                        >
+                            확인
+                        </button>
+                    </div>
+                </Modal>
 
             </div>
         </div>

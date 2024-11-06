@@ -16,7 +16,7 @@ export const ChatRooms: React.FC<ChatRoomProps> = ({ chatRoomId, nickname }) => 
     const handleLeaveChatRoom = async () => {
         try {
             await deleteChatRoomApi(chatRoomId, nickname);
-            console.log("채팅방 나가기 성공");
+            
         } catch (error) {
             console.error("채팅방 나가기 실패", error);
         } finally {

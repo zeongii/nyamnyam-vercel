@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="" />
+    <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/app/(page)/user/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/user/account/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/ChatRooms.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/ChatRooms.tsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -67,7 +70,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "yarn",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "ts.external.directory.path": "C:\\Users\\APRO\\Desktop\\team\\기능별\\release\\nyamnyam-front\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "C:\\Users\\bitcamp\\team\\release\\nyamnyam-frontrelease0.08\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
