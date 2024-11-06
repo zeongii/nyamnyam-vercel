@@ -121,7 +121,12 @@ export default function Account(selectUser: Partial<AccountProps>) {
                     </div>
                     <div className="name heading6 mt-4 text-left">{selectUser?.selectUser?.nickname}</div>
                     <div className="mail heading6 font-normal normal-case text-secondary mt-1 text-sm text-left">
-                        냠냠온도: {selectUser?.selectUser?.score}
+
+                        <span className="text-border"> 냠냠온도: </span>
+
+                        <span className="tag px-4 py-1.5 rounded-full bg-blue-100 text-blue-800">
+                            {selectUser?.selectUser?.score}
+                        </span>
                     </div>
                 </div>
                 <div className="menu-tab w-full max-w-none lg:mt-10 mt-6">
