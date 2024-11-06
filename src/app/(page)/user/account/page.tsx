@@ -185,7 +185,6 @@ export default function Account(user: Partial<AccountProps>) {
                         </button>                
                     </div>
                 </Modal>
-
             </div>
         </div>
     );

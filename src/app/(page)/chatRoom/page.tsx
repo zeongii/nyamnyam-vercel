@@ -5,8 +5,8 @@ import Image from 'next/image';
 import EmojiPicker from "src/app/components/EmojiPicker";
 import { useRouter } from "next/navigation"; // 이 라인은 이제 필요 없을 수 있습니다.
 import { Suspense, useEffect, useRef, useState } from "react";
-import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "src/app/service/chatRoom/chatRoom.api";
-import { sendMessageService, subscribeMessages } from "src/app/service/chat/chat.api";
+import { deleteChatRoomsService, getChatRoomData, getChatRoomDetails } from "@/app/service/chatRoom/chatRoom.service";
+import { sendMessageService, subscribeMessages } from "@/app/service/chat/chat.service";
 import { ChatRoomModel } from "src/app/model/chatRoom.model";
 import { ChatModel } from "src/app/model/chat.model";
 import { getUnreadCount, markMessageAsRead, subscribeToChats } from "src/app/api/chat/chat.api";
