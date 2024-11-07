@@ -1,4 +1,3 @@
-// src/app/service/user.service.ts
 import { User } from "src/app/model/user.model";
 import {
     fetchUserExists,
@@ -8,42 +7,67 @@ import {
     deleteUserById,
     updateUser,
     registerUser,
-    loginUser, uploadThumbnailApi,
+    loginUser,
+    uploadThumbnailApi,
     toggleEnable as toggleEnableApi,
-    increaseScoreApi,decreaseScoreApi,
+    increaseScoreApi,
+    decreaseScoreApi,
 } from "src/app/api/user/user.api";
 
-// 사용자 존재 여부 확인 서비스
-export const checkUserExists = async (id: string): Promise<boolean> => {
-    return await fetchUserExists(id);
+export const checkUserExists = async (id: string, showModalAlert: (msg: string) => void): Promise<boolean> => {
+    try {
+        return await fetchUserExists(id);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-// 사용자 정보 가져오기 서비스
-export const getUserById = async (id: string): Promise<User> => {
-    return await fetchUserById(id);
+export const getUserById = async (id: string, showModalAlert: (msg: string) => void): Promise<User> => {
+    try {
+        return await fetchUserById(id);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-// 모든 사용자 가져오기 서비스
-export const getAllUsers = async (): Promise<User[]> => {
-    return await fetchAllUsers();
+export const getAllUsers = async (showModalAlert: (msg: string) => void): Promise<User[]> => {
+    try {
+        return await fetchAllUsers();
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-// 사용자 수 가져오기 서비스
-export const getUserCount = async (): Promise<number> => {
-    return await fetchUserCount();
+export const getUserCount = async (showModalAlert: (msg: string) => void): Promise<number> => {
+    try {
+        return await fetchUserCount();
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-// 사용자 삭제 서비스
-export const removeUserById = async (id: string): Promise<void> => {
-    await deleteUserById(id);
+export const removeUserById = async (id: string, showModalAlert: (msg: string) => void): Promise<void> => {
+    try {
+        await deleteUserById(id);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-// 사용자 정보 업데이트 서비스
-export const modifyUser = async (user: User): Promise<User> => {
-    return await updateUser(user);
+export const modifyUser = async (user: User, showModalAlert: (msg: string) => void): Promise<User> => {
+    try {
+        return await updateUser(user);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-// 회원가입과 썸네일 업로드를 연계하는 함수
 export const addUser = async (
     username: string,
     password: string,
@@ -52,10 +76,9 @@ export const addUser = async (
     age: number | string,
     tel: string,
     gender: string,
-    thumbnails: File[]
+    thumbnails: File[],
+    showModalAlert: (msg: string) => void
 ) => {
-    console.log("Adding user:", { username, password, nickname, name, age, tel, gender });
-
     const user: Partial<User> = {
         username,
         password,
@@ -70,56 +93,75 @@ export const addUser = async (
     };
 
     try {
-        // 사용자 정보만 등록
         const registeredUser = await registerUser(user);
-        console.log("User registered:", registeredUser);
-
-        // 등록 후 썸네일 업로드
         if (thumbnails.length > 0) {
-            const thumbnailUrls = await uploadThumbnailApi(registeredUser.id, thumbnails);
-            console.log("Uploaded thumbnail URLs:", thumbnailUrls);
+            await uploadThumbnailApi(registeredUser.id, thumbnails);
+        }
+        return registeredUser;
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
+};
+
+export const updateUserImgId = async (userId: string, imgId: string, showModalAlert: (msg: string) => void) => {
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/updateImgId`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, imgId }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update user imgId');
         }
 
-        return registeredUser;
-    } catch (error) {
-        console.error("Registration failed:", error);
-        throw new Error("Failed to register user");
+        console.log("User imgId updated successfully");
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
     }
 };
 
-
-export const updateUserImgId = async (userId: string, imgId: string) => {
-    const response = await fetch(`http://localhost:8081/api/user/updateImgId`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, imgId }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to update user imgId');
+export const authenticateUser = async (
+    username: string,
+    password: string,
+    showModalAlert: (msg: string) => void
+): Promise<string> => {
+    try {
+        return await loginUser(username, password);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
     }
-
-    console.log("User imgId updated successfully");
 };
 
-// 사용자 로그인 서비스
-export const authenticateUser = async (username: string, password: string): Promise<string> => {
-    return await loginUser(username, password);
+export const toggleEnable = async (userId: string, enabled: boolean, showModalAlert: (msg: string) => void): Promise<void> => {
+    try {
+        await toggleEnableApi(userId, enabled);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-export const toggleEnable = async (userId: string, enabled: boolean): Promise<void> => {
-    await toggleEnableApi(userId, enabled);
+export const increaseScore = async (userId: string, showModalAlert: (msg: string) => void): Promise<void> => {
+    try {
+        await increaseScoreApi(userId);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
 
-export const increaseScore = async (userId: string): Promise<void> => {
-    await increaseScoreApi(userId);
+export const decreaseScore = async (userId: string, showModalAlert: (msg: string) => void): Promise<void> => {
+    try {
+        await decreaseScoreApi(userId);
+    } catch (error: any) {
+        showModalAlert(error);
+        throw error;
+    }
 };
-
-// 점수 감소 서비스
-export const decreaseScore = async (userId: string): Promise<void> => {
-    await decreaseScoreApi(userId);
-};
-
 

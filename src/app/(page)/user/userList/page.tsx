@@ -1,36 +1,24 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {fetchAllUsers, fetchUserById, toggleEnable} from "@/app/api/user/user.api";
+import { fetchAllUsers, fetchUserById, toggleEnable } from "@/app/api/user/user.api";
 import { User } from "@/app/model/user.model";
 import Modal from "@/app/components/Modal";
 import Account from "@/app/(page)/user/account/page";
 import nookies from "nookies";
 
-const UserTable = ({ users = [] }) => {
+const UserTable = ({ users = [], onUpdateUsers }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [sortColumn, setSortColumn] = useState('username');
-    const [sortDirection, setSortDirection] = useState('asc');
+    const [sortColumn, setSortColumn] = useState("username");
+    const [sortDirection, setSortDirection] = useState("asc");
     const itemsPerPage = 10;
-    const [user, setUser] = useState<User | null>(null);
-
-    const cookie = nookies.get();
-    const userId = cookie.userId;
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const myInfo = await fetchUserById(userId);
-            setUser(myInfo);
-        }
-        fetchData()
-    }, []);
 
     const indexOfLastUser = currentPage * itemsPerPage;
     const indexOfFirstUser = indexOfLastUser - itemsPerPage;
 
     const sortedUsers = [...users].sort((a, b) => {
-        const isAsc = sortDirection === 'asc';
+        const isAsc = sortDirection === "asc";
         if (a[sortColumn] < b[sortColumn]) {
             return isAsc ? -1 : 1;
         }
@@ -58,21 +46,14 @@ const UserTable = ({ users = [] }) => {
     const handleToggleEnable = async (userId: string, currentStatus: boolean) => {
         try {
             await toggleEnable(userId, !currentStatus);
-            // 상태 변경 후 사용자 목록을 새로고침
-            setSelectedUser({ ...selectedUser, enabled: !currentStatus } as User);
+            const updatedUsers = users.map((user) =>
+                user.id === userId ? { ...user, enabled: !currentStatus } : user
+            );
+            onUpdateUsers(updatedUsers); // 부모 컴포넌트의 상태를 업데이트
         } catch (error) {
             console.error("Failed to toggle enable status");
         }
     };
-
-    if (user?.role !== 'ADMIN') {
-        return (
-            <div className="unauthorized text-center mt-5">
-                <h2>권한이 없습니다</h2>
-                <p>You do not have permission to view this content.</p>
-            </div>
-        );
-    }
 
     const openModal = (user) => {
         setSelectedUser(user);
@@ -85,7 +66,7 @@ const UserTable = ({ users = [] }) => {
     };
 
     const handleSort = (column) => {
-        setSortDirection(prevDirection => prevDirection === 'asc' ? 'desc' : 'asc');
+        setSortDirection((prevDirection) => (prevDirection === "asc" ? "desc" : "asc"));
         setSortColumn(column);
     };
 
@@ -113,7 +94,7 @@ const UserTable = ({ users = [] }) => {
                 </thead>
                 <tbody>
                 {currentUsers.map((u) => (
-                    <tr className="item duration-300 border-b border-line" key={u.username} onClick={() => openModal(u)}>
+                    <tr className="item duration-300 border-b border-line" key={u.username}>
                         <td className="py-3 text-left">
                             <input
                                 type="checkbox"
@@ -122,17 +103,31 @@ const UserTable = ({ users = [] }) => {
                             />
                         </td>
                         <td className="py-3 text-left">
-                            <strong className="text-title cursor-pointer">{u.username}</strong>
+                            <strong
+                                className="text-title cursor-pointer"
+                                onClick={() => openModal(u)} // Username 클릭 시에만 모달이 열립니다.
+                            >
+                                {u.username}
+                            </strong>
                         </td>
                         <td className="py-3">{u.nickname}</td>
                         <td className="py-3">{u.role}</td>
                         <td className="py-3 text-right">
-                                <span className={`tag px-4 py-1.5 rounded-full bg-opacity-10 ${u.score < 40 ? 'bg-sky-500 text-sky-500' :
-                                    u.score < 50 ? 'bg-green-400 text-green-400' :
-                                        u.score < 60 ? 'bg-yellow-500 text-yellow-500' :
-                                            u.score < 80 ? 'bg-orange-400 text-orange-400' :
-                                                u.score < 100 ? 'bg-red-500 text-red-500' :
-                                                    'bg-gray text-gray'} caption1 font-semibold`}>
+                                <span
+                                    className={`tag px-4 py-1.5 rounded-full bg-opacity-10 ${
+                                        u.score < 40
+                                            ? "bg-sky-500 text-sky-500"
+                                            : u.score < 50
+                                                ? "bg-green-400 text-green-400"
+                                                : u.score < 60
+                                                    ? "bg-yellow-500 text-yellow-500"
+                                                    : u.score < 80
+                                                        ? "bg-orange-400 text-orange-400"
+                                                        : u.score < 100
+                                                            ? "bg-red-500 text-red-500"
+                                                            : "bg-gray text-gray"
+                                    } caption1 font-semibold`}
+                                >
                                     {u.score}
                                 </span>
                         </td>
@@ -158,20 +153,19 @@ const UserTable = ({ users = [] }) => {
 };
 
 export default function UserList() {
-    const [user, setUser] = useState<User[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
         const userList = async () => {
             const data = await fetchAllUsers();
-            setUser(data);
+            setUsers(data);
         };
         userList();
     }, []);
 
     return (
         <div>
-            <UserTable users={user} />
+            <UserTable users={users} onUpdateUsers={setUsers} />
         </div>
     );
 }
-

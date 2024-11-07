@@ -1,195 +1,255 @@
 import { User } from "src/app/model/user.model";
+import axios from "axios";
+
 let token: string | null = null;
 
 if (typeof window !== "undefined") {
     token = localStorage.getItem('token');
 }
-
-export const fetchUserExists = async (id: string): Promise<boolean> => {
-    const response = await fetch(`http://localhost:8081/api/user/existsById?id=${id}`,{
-        method: "GET",
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '', // JWT 토큰을 Bearer 형식으로 추가
-            "Content-Type": "application/json",
-        },});
-    if (!response.ok) {
-        throw new Error('Failed to fetch user existence');
-    }
-    return response.json();
-};
-
-export const fetchUserById = async (id: string): Promise<User> => {
-    const response = await fetch(`http://localhost:8081/api/user/findById?id=${id}`,{
-        method: "GET",
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '', // JWT 토큰을 Bearer 형식으로 추가
-            "Content-Type": "application/json",
-        },});
-    if (!response.ok) {
-        throw new Error('Failed to fetch user by ID');
-    }
-    return response.json();
-};
-
 export const fetchAllUsers = async (): Promise<User[]> => {
-    const response = await fetch(`http://localhost:8081/api/user/findAll`,{
-        method: "GET",
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-            "Content-Type": "application/json",
-        },
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch all users');
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/findAll`, {
+            method: "GET",
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+        return response.json();
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
-    return response.json();
 };
 
+// 사용자 수 가져오기
 export const fetchUserCount = async (): Promise<number> => {
-    const response = await fetch(`http://localhost:8081/api/user/count`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch user count');
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/count`, {
+            method: "GET",
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+        return response.json();
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
-    return response.json();
 };
 
+// 사용자 삭제
 export const deleteUserById = async (id: string): Promise<void> => {
-    const response = await fetch(`http://localhost:8081/api/user/deleteById?id=${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-            'Content-Type': 'application/json',
-        },
-    });
-    if (!response.ok) {
-        throw new Error('Failed to delete user');
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/deleteById?id=${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
 };
 
-
-export const updateUser = async (user: User): Promise<User> => {
-    const response = await fetch(`http://localhost:8081/api/user/update`, {
-        method: 'PUT',
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(user),
-    });
-    if (!response.ok) {
-        throw new Error('Failed to update user');
-    }
-    return response.json();
-};
-
-export const loginUser = async (username: string, password: string): Promise<string> => {
-    const response = await fetch(`http://localhost:8081/api/user/login?username=${username}&password=${password}`, {
-        method: 'POST',
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to log in');
-    }
-
-
-    const contentType = response.headers.get('Content-Type');
-    if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        return data.token;
-    } else {
-        return response.text();
-    }
-};
-
-export const registerUser = async (user: Partial<User>, thumbnails: File[] = []): Promise<User> => {
+export const updateUser = async (user: Partial<User>, thumbnails: File[] = []): Promise<User> => {
     const formData = new FormData();
     formData.append("user", new Blob([JSON.stringify(user)], { type: "application/json" }));
 
-    // 썸네일이 있을 경우에만 추가
-    if (thumbnails.length > 0) {
-        thumbnails.forEach((thumbnail) => {
-            formData.append("thumbnails", thumbnail);
+    // thumbnails가 있을 경우 추가
+    thumbnails.forEach(thumbnail => formData.append("thumbnails", thumbnail));
+
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/update`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+            },
+            body: formData,
         });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+        return response.json();
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
-
-    const response = await fetch("http://localhost:8081/api/user/register", {
-        method: "POST",
-        body: formData,
-    });
-
-    console.log("Register user response status:", response.status);
-    console.log("Register user response:", await response.text());
-
-    if (!response.ok) {
-        throw new Error("Failed to register user");
-    }
-    return response.json();
 };
 
 
-// 이미지 파일만 업로드하는 함수
+
+
+// 사용자 존재 여부 확인
+export const fetchUserExists = async (id: string): Promise<boolean> => {
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/existsById?id=${id}`, {
+            method: "GET",
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+        return response.json();
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
+    }
+};
+
+// 사용자 ID로 정보 가져오기
+export const fetchUserById = async (id: string): Promise<User> => {
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/findById?id=${id}`, {
+            method: "GET",
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+        return response.json();
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
+    }
+};
+
+// 사용자 등록 (회원가입)
+export const registerUser = async (user: Partial<User>, thumbnails: File[] = []): Promise<User> => {
+    const formData = new FormData();
+    formData.append("user", new Blob([JSON.stringify(user)], { type: "application/json" }));
+    thumbnails.forEach(thumbnail => formData.append("thumbnails", thumbnail));
+
+    try {
+        const response = await fetch("http://localhost:8081/api/user/register", {
+            method: "POST",
+            body: formData,
+        });
+        if (!response.ok) {
+            if (response.status === 409) throw new Error("이미 사용 중인 사용자 이름입니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+        return response.json();
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
+    }
+};
+
+// 사용자 로그인
+export const loginUser = async (username: string, password: string): Promise<string> => {
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/login?username=${username}&password=${password}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            // 401 에러와 같은 특정 상태 코드를 명시적으로 처리
+            if (response.status === 401) throw new Error("아이디 또는 비밀번호가 잘못되었습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+
+        // 응답이 JSON 객체인 경우 JSON 파싱, 그렇지 않으면 단순 문자열로 처리
+        const contentType = response.headers.get('Content-Type');
+        const data = contentType && contentType.includes('application/json')
+            ? await response.json()
+            : await response.text();
+
+        return typeof data === 'string' ? data : data.token; // 토큰 반환
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
+    }
+};
+
+
+// 썸네일 업로드
 export const uploadThumbnailApi = async (userId: string, thumbnails: File[]): Promise<string[]> => {
     const formData = new FormData();
-    formData.append('userId', userId);
+    thumbnails.forEach(thumbnail => formData.append('images', thumbnail));
 
-    thumbnails.forEach((thumbnail) => {
-        formData.append('files', thumbnail);
-    });
-
-    const response = await fetch('http://localhost:8081/api/thumbnails/upload', {
-        method: 'POST',
-        body: formData,
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to upload thumbnails');
+    try {
+        const response = await axios.post(`http://localhost:8081/api/thumbnails/upload`, formData, {
+            params: { userId },
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    } catch (error: any) {
+        if (error.response && error.response.status === 500) {
+            return Promise.reject("썸네일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
-
-    return response.json();
 };
 
-
+// 사용자 활성화 상태 토글
 export const toggleEnable = async (userId: string, enabled: boolean): Promise<void> => {
-    const response = await fetch(`http://localhost:8081/api/user/toggleEnable?userId=${userId}&enabled=${enabled}`, {
-        method: 'PUT',
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to toggle user enable status');
+    try {
+        const response = await fetch(`http://localhost:8081/api/user/toggleEnable?userId=${userId}&enabled=${enabled}`, {
+            method: 'PUT',
+            headers: { 'Authorization': token ? `Bearer ${token}` : '' },
+        });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
 };
 
+// 사용자 점수 증가
 export const increaseScoreApi = async (userId: string): Promise<void> => {
-    const response = await fetch(`http://localhost:8081/api/score/scoreUp?userId=${userId}`, {
-        method: 'POST',
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to increase score');
+    try {
+        const response = await fetch(`http://localhost:8081/api/score/scoreUp?userId=${userId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
 };
 
+// 사용자 점수 감소
 export const decreaseScoreApi = async (userId: string): Promise<void> => {
-    const response = await fetch(`http://localhost:8081/api/score/scoreDown?userId=${userId}`, {
-        method: 'POST',
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to decrease score');
+    try {
+        const response = await fetch(`http://localhost:8081/api/score/scoreDown?userId=${userId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("사용자를 찾을 수 없습니다.");
+            throw new Error("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+    } catch (error: any) {
+        return Promise.reject(error.message || "예기치 못한 오류가 발생했습니다.");
     }
 };
-
-
-
-

@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { addUser } from "@/app/service/user/user.service";
+import useModalAlert from "@/app/context/useModalAlert";
+import Modal from "@/app/components/Modal";
 
 export default function Register() {
     const router = useRouter();
@@ -14,7 +16,8 @@ export default function Register() {
     const [tel, setTel] = useState('');
     const [gender, setGender] = useState('');
     const [thumbnail, setThumbnail] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null); // 미리보기 URL 상태 추가
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const { isModalOpen, modalMessage, showModalAlert, closeModal } = useModalAlert();
 
     const isValidPhoneNumber = (phone: string) => {
         const regex = /^\d{3}-\d{4}-\d{4}$/;
@@ -37,25 +40,37 @@ export default function Register() {
         }
 
         if (errors.length > 0) {
-            alert(errors.join('\n'));
+            showModalAlert(errors.join('\n'));
             return;
         }
 
         try {
-            const newUser = await addUser(username, password, nickname, name, age, tel, gender, thumbnail ? [thumbnail] : []);
+            // addUser 호출 시 showModalAlert 추가
+            const newUser = await addUser(
+                username,
+                password,
+                nickname,
+                name,
+                age,
+                tel,
+                gender,
+                thumbnail ? [thumbnail] : [],
+                showModalAlert // 이 부분 추가
+            );
             console.log('User registered:', newUser);
             router.push("/user/login");
         } catch (error) {
             console.error('Registration failed:', error);
-            alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+            showModalAlert('회원가입에 실패했습니다. 다시 시도해주세요.');
         }
     };
+
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             const file = event.target.files[0];
             setThumbnail(file);
-            setPreviewUrl(URL.createObjectURL(file)); // 선택한 이미지의 URL을 미리보기 상태에 설정
+            setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
@@ -63,7 +78,6 @@ export default function Register() {
         setThumbnail(null);
         setPreviewUrl(null);
     };
-
 
     return (
         <div className="register-block md:py-20 py-10 mt-10" style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: '#f9f9f9' }}>
@@ -190,6 +204,12 @@ export default function Register() {
                     </div>
                 </div>
             </div>
+
+            {/* 모달 에러 메시지 */}
+            <Modal isOpen={isModalOpen} onClose={closeModal}>
+                <p>{modalMessage}</p>
+                <button onClick={closeModal} className="button-main mt-4">확인</button>
+            </Modal>
         </div>
     );
 }

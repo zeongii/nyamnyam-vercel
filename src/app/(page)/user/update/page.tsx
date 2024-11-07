@@ -1,18 +1,19 @@
 // EditProfile.tsx
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User } from "@/app/model/user.model";
-import {uploadThumbnailApi} from "@/app/api/user/user.api";
-import {modifyUser} from "@/app/service/user/user.service";
+import { User } from "@/app/model/user.model"; // User 모델이 존재하는지 확인하세요
+import { uploadThumbnailApi } from "@/app/api/user/user.api";
+import { modifyUser } from "@/app/service/user/user.service";
+
 interface EditProfileProps {
-    user?: User;
+    user?: User; // user가 선택적 prop으로 정의되어 있어야 합니다
 }
 
-export default ({user}: Partial<EditProfileProps>) => {
+export default ({ user }: Partial<EditProfileProps>) => {
     const router = useRouter();
 
-    // user가 없는 경우 기본값을 설정합니다.
+    // 초기 상태를 user prop을 기반으로 설정
     const [username, setUsername] = useState(user?.username || '');
     const [password, setPassword] = useState('');
     const [nickname, setNickname] = useState(user?.nickname || '');
@@ -21,11 +22,16 @@ export default ({user}: Partial<EditProfileProps>) => {
     const [tel, setTel] = useState(user?.tel || '');
     const [gender, setGender] = useState(user?.gender || '');
     const [thumbnail, setThumbnail] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    const isValidPhoneNumber = (phone: string) => {
+        const regex = /^\d{3}-\d{4}-\d{4}$/;
+        return regex.test(phone);
+    };
 
     const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // 에러 체크
         const errors = [];
         if (!username) errors.push("Username은 필수 입력입니다.");
         if (!nickname) errors.push("Nickname은 필수 입력입니다.");
@@ -55,7 +61,7 @@ export default ({user}: Partial<EditProfileProps>) => {
 
         if (thumbnail) {
             try {
-                const imgIds = await uploadThumbnailApi([thumbnail]);
+                const imgIds = await uploadThumbnailApi(user?.id || '', [thumbnail]);
                 updatedUser.imgId = imgIds.length > 0 ? imgIds[0].toString() : user?.imgId;
             } catch (error) {
                 console.error('썸네일 업로드 실패:', error);
@@ -63,24 +69,27 @@ export default ({user}: Partial<EditProfileProps>) => {
         }
 
         try {
+            // @ts-ignore
             await modifyUser(updatedUser);
             alert('프로필이 성공적으로 수정되었습니다.');
-            router.push("/user/profile");
+            router.push(`/user/mypage/${user?.id}`);
         } catch (error) {
             console.error('정보 수정 실패:', error);
             alert('정보 수정에 실패했습니다. 다시 시도해주세요.');
         }
     };
 
-    const isValidPhoneNumber = (phone: string) => {
-        const regex = /^\d{3}-\d{4}-\d{4}$/;
-        return regex.test(phone);
-    };
-
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
-            setThumbnail(event.target.files[0]);
+            const file = event.target.files[0];
+            setThumbnail(file);
+            setPreviewUrl(URL.createObjectURL(file));
         }
+    };
+
+    const handleRemoveThumbnail = () => {
+        setThumbnail(null);
+        setPreviewUrl(null);
     };
 
     return (
@@ -178,6 +187,18 @@ export default ({user}: Partial<EditProfileProps>) => {
                                     style={{ display: 'none' }}
                                 />
                                 {thumbnail && <p>{thumbnail.name} 선택됨</p>}
+                                {previewUrl && (
+                                    <div className="mt-3">
+                                        <img src={previewUrl} alt="Thumbnail preview" style={{ width: '100px', height: '100px', borderRadius: '8px' }} />
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveThumbnail}
+                                            className="button-secondary mt-2"
+                                        >
+                                            썸네일 삭제
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <div className="block-button md:mt-7 mt-4">
                                 <button type="submit" className="button-main">Update Profile</button>

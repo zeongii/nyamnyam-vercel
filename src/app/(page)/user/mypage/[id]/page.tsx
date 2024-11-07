@@ -141,8 +141,12 @@ export default function MyPage() {
 
     const handleConfirmDelete = async () => {
         try {
+            // @ts-ignore
             await removeUserById(userId); // 실제 탈퇴 요청
-            alert("회원 탈퇴가 완료되었습니다.");
+
+            // 모달을 통해 성공 메시지 표시
+            setAlertMessage("회원 탈퇴가 완료되었습니다.");
+            setAlertOpen(true); // 성공 모달 열기
 
             // 세션 및 로컬 저장소 초기화
             nookies.destroy(null, "userId");
@@ -157,10 +161,14 @@ export default function MyPage() {
             router.push("/");
         } catch (error) {
             console.error("회원 탈퇴 실패:", error);
-            alert("회원 탈퇴에 실패했습니다. 다시 시도해주세요.");
+
+            // 실패 시 모달을 통해 오류 메시지 표시
+            setAlertMessage("회원 탈퇴에 실패했습니다. 다시 시도해주세요.");
+            setAlertOpen(true); // 실패 모달 열기
         }
-        setAlertOpen(false); // Modal 닫기
+        // setAlertOpen(false); // 모달을 닫는 부분은 각 모달에서 처리
     };
+
 
 
     const countData = {

@@ -1,12 +1,14 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import * as Icon from "@phosphor-icons/react/dist/ssr";
 import { jwtDecode } from 'jwt-decode';
 import nookies from 'nookies';
+import Modal from "@/app/components/Modal";
 
-import {authenticateUser} from "@/app/service/user/user.service";
+import { authenticateUser } from "@/app/service/user/user.service";
+import useModalAlert from "@/app/context/useModalAlert";
 
 interface DecodedToken {
     sub: string;
@@ -21,43 +23,26 @@ export default function Home() {
     const router = useRouter();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-
+    const { isModalOpen, modalMessage, showModalAlert, closeModal } = useModalAlert();
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            const token = await authenticateUser(username, password);
-
-            console.log('Token:', token);
-
+            const token = await authenticateUser(username, password, showModalAlert);
             const decoded: DecodedToken = jwtDecode<DecodedToken>(token);
 
             nookies.set(null, 'userId', decoded.sub, { path: '/' });
-
             localStorage.setItem('token', token);
             localStorage.setItem('nickname', decoded.nickname);
             localStorage.setItem('username', decoded.username);
             localStorage.setItem('role', decoded.role);
             localStorage.setItem('score', String(decoded.score));
 
-            // 홈 페이지로 이동
             router.push("/");
-        } catch (error: any) {
+        } catch (error) {
             console.error('Login failed:', error);
-
-            if (error.message === "Account is disabled") {
-                setErrorMessage("해당 계정은 차단되었습니다. 관리자에게 문의해 주세요.");
-            } else if (error.message === "Invalid username or password") {
-                setErrorMessage("아이디 또는 비밀번호가 올바르지 않습니다.");
-            } else {
-                setErrorMessage("로그인에 실패했습니다. 다시 시도해 주세요.");
-            }
         }
     };
-
-
-
 
     return (
         <div className="login-block md:py-20 py-10 mt-10" style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: '#f9f9f9' }}>
@@ -68,7 +53,7 @@ export default function Home() {
                         <form className="md:mt-7 mt-4" onSubmit={handleLogin}>
                             <div className="username">
                                 <input className="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username"
-                                       type="username" placeholder="username" required
+                                       type="text" placeholder="username" required
                                        value={username} onChange={(e) => setUsername(e.target.value)} />
                             </div>
                             <div className="pass mt-5">
@@ -104,7 +89,12 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+
+            {/* 에러 메시지 모달 */}
+            <Modal isOpen={isModalOpen} onClose={closeModal}>
+                <p>{modalMessage}</p>
+                <button onClick={closeModal} className="button-main mt-4">확인</button>
+            </Modal>
         </div>
     );
 }
-
