@@ -347,9 +347,13 @@ export default function Home1() {
                         <React.Fragment key={room.id}>
                           <li>
                             <div className="user-item --active" style={{ padding: '10px 0', backgroundColor: '#FFFFFF', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
-                              <div className="user-item__avatar">
-                                <Image src="/assets/img/user-list-1.png" alt="user" width={40} height={40} style={{ borderRadius: '50%' }} />
-                              </div>
+                              {/* <div className="user-item__avatar">
+                                                            {user ? (
+                                                                <Link href={`/user/mypage/${user?.userId}`} className="profile">
+                                                                    <img src="/assets/img/profile.png" alt="profile" />
+                                                                </Link>
+                                                            ) : null}
+                                                        </div> */}
                               <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginLeft: '10px' }}>
                                 <a
                                   href="#"
@@ -410,9 +414,9 @@ export default function Home1() {
               >
                 {selectedChatRoomId ? (
                   <div className="user-item">
-                    <div className="user-item__avatar">
-                      <Image src="/assets/img/user-list-4.png" alt="user" width={40} height={40} />
-                    </div>
+                    {/* <div className="user-item__avatar">
+                                        <Image src="/assets/img/user-list-4.png" alt="user" width={40} height={40} />
+                                    </div> */}
                     <div className="user-item__desc" style={{ width: '100%' }}>
                       <div
                         className="user-item__name"
@@ -562,7 +566,7 @@ export default function Home1() {
                       </button>
 
                       {showEmojiPicker && (
-                        <div ref={emojiPickerRef} className="absolute bottom-16 left-0 z-50 bg-white shadow-lg p-2 rounded">
+                        <div ref={emojiPickerRef} className="absolute bottom-16 left-25 z-50 bg-white shadow-lg p-2 rounded">
                           <EmojiPicker onSelectEmoji={handleEmojiSelect} />
                         </div>
                       )}

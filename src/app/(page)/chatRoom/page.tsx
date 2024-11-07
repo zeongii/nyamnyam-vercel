@@ -268,6 +268,7 @@ export default function Home1() {
         );
     });
 
+
     return (
         <>
             <Head>
@@ -339,7 +340,7 @@ export default function Home1() {
 
                                             // 참가자 목록을 문자열로 변환하여 출력
                                             const otherParticipantsStr = otherParticipants.length > 0 ? otherParticipants.join(', ') : "No Participants";
-                                                
+
                                             return (
                                                 <React.Fragment key={room.id}>
                                                     <li>
@@ -563,7 +564,7 @@ export default function Home1() {
                                             </button>
 
                                             {showEmojiPicker && (
-                                                <div ref={emojiPickerRef} className="absolute bottom-16 left-0 z-50 bg-white shadow-lg p-2 rounded">
+                                                <div ref={emojiPickerRef} className="absolute bottom-16 left-25 z-50 bg-white shadow-lg p-2 rounded">
                                                     <EmojiPicker onSelectEmoji={handleEmojiSelect} />
                                                 </div>
                                             )}
