@@ -25,9 +25,9 @@ import Modal from 'src/app/components/Modal';
 import { fetchReportRegister } from '@/app/service/report/report.service';
 import { PostListProps } from '@/app/model/props';
 import nookies from 'nookies';
-import {User} from "@/app/model/user.model";
+import { User } from "@/app/model/user.model";
 import Account from "@/app/(page)/user/account/page";
-import {getUserById, increaseScore, decreaseScore } from "@/app/service/user/user.service";
+import { getUserById, increaseScore, decreaseScore } from "@/app/service/user/user.service";
 import ReplyHandler from './reply/page';
 
 const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
@@ -49,12 +49,15 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
     const [sort, setSort] = useState<'date' | 'rating' | 'likes'>('date');
     const [visible, setVisible] = useState(2);
     const [reportingPostId, setReportingPostId] = useState<number | null>(null);
-    const [reportReason, setReportReason] = useState<string>("");
+    const [reportReason, setReportReason] = useState("");
     const router = useRouter();
     const currentUserId = nookies.get().userId;
     const nickname = localStorage.getItem('nickname') || '';
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [deletePostId, setDeletePostId] = useState<number>();
+    const [modalType, setModalType] = useState("");
 
     // 신고하기
     const reportReasons = [
@@ -144,28 +147,68 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
         setIsOpen(false);
     }
 
-    const handleDelete = async (postId: number) => {
-        if (window.confirm("게시글을 삭제하시겠습니까?")) {
-            const success = await postService.remove(postId);
+    const handleDeleteClick = (postId: number) => {
+        setAlertMessage("게시글을 삭제하시겠습니까?");
+        setDeletePostId(postId);
+        setReportReason("");
+        setModalType("delete");
+        setAlertOpen(true);
+    };
 
+    const handleReportClick = (postId: number) => {
+        setAlertMessage("신고 사유를 선택해주세요.");
+        setDeletePostId(postId);
+        setReportReason("");
+        setModalType("report");
+        setAlertOpen(true);
+    };
+
+    const handleConfirmAction = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (modalType === "delete" && deletePostId !== null) {
+            const success = await postService.remove(deletePostId);
             if (success) {
-                alert("게시글이 삭제되었습니다.");
-                setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+                setAlertOpen(false);
+                setPosts((prevPosts) => prevPosts.filter((post) => post.id !== deletePostId));
 
                 setImages((prevImages) => {
                     const updatedImages = { ...prevImages };
-                    delete updatedImages[postId];
+                    delete updatedImages[deletePostId];
                     return updatedImages;
-                })
+                });
 
-                const updatedDetails = imgDetails.filter((detail) => detail.postId !== postId);
+                const updatedDetails = imgDetails.filter((detail) => detail.postId !== deletePostId);
                 setImgDetails(updatedDetails);
-
                 setAllImages(updatedDetails.map((detail) => detail.url));
 
                 router.push(`/restaurant/${restaurantId}`);
             }
+        } else if (modalType === "report") {
+            // 신고 로직
+            const selectedReason = reportReason;
+    
+            if (!selectedReason) {
+                alert("신고 사유를 선택해주세요.");
+                return;
+            }
+    
+            const reportModel: ReportModel = {
+                userId: currentUserId,
+                postId: deletePostId,
+                reason: selectedReason,
+                entryDate: ''
+            };
+    
+            try {
+                await fetchReportRegister(reportModel);
+                setAlertOpen(false);
+                setReportReason("");
+            } catch (error) {
+                alert("신고 제출 중 오류가 발생했습니다.");
+            }
         }
+        setDeletePostId(null);
+        setModalType("");
     };
 
     // 정렬 
@@ -184,7 +227,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
 
     // View More
     const handleViewMore = () => {
-        if(visible >= sortedPosts.length){
+        if (visible >= sortedPosts.length) {
             setVisible(2);
         } else {
             setVisible((prevVisible) => prevVisible + 2);
@@ -215,7 +258,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
         return `${year}년 ${month}월 ${day}일`;
     };
 
-// 좋아요 & 취소 & count
+    // 좋아요 & 취소 & count
     const handleLike = async (postId: number, postUserId: string) => {
         if (postUserId === currentUserId) {
             window.alert("본인의 리뷰에는 좋아요를 누를 수 없어요.");
@@ -237,46 +280,6 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
             } else {
                 await decreaseScore(postUserId); // 좋아요 취소 시
             }
-        }
-    };
-
-
-    // 신고하기
-    const postReport = async (postId: number) => {
-        const selectedReason = reportReason;
-
-        if (!selectedReason) {
-            alert("신고 사유를 선택해주세요.");
-            return;
-        }
-
-        const reportModel: ReportModel = {
-            userId: currentUserId,
-            postId: postId,
-            reason: selectedReason,
-            entryDate: ''
-        };
-
-        try {
-            await fetchReportRegister(reportModel);
-            alert('신고가 성공적으로 제출되었습니다.');
-
-        } catch (error) {
-            console.error('신고 중 오류 발생:', error);
-            alert('신고 중 오류가 발생했습니다.');
-        }
-    };
-
-    const handleReportClick = (postId: number) => {
-        setReportingPostId(postId);
-        setReportReason("");
-    };
-
-    const handleReportSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        if (reportingPostId !== null) {
-            await postReport(reportingPostId);
-            setReportingPostId(null);
         }
     };
 
@@ -448,42 +451,50 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
                                                 <Star w="w-4" h="h-4" readonly={true} rate={p.averageRating} />
                                                 <p className='ml-2'>{p.averageRating.toFixed(1)} / 5</p>
                                             </div>
-                                            <PostOptions
-                                                postUserId={p.userId ?? ''}
-                                                currentId={currentUserId}
-                                                onEdit={() => { router.push(`/post/${restaurantId}/update/${p.id}`) }}
-                                                onDelete={() => handleDelete(p.id)}
-                                                onReport={() => handleReportClick(p.id)}
-                                            />
-                                        </div>
-                                        {reportingPostId === p.id && (
-                                            <div className="mt-4">
-                                                <form onSubmit={handleReportSubmit} className="flex flex-col">
-                                                    <label className="text-gray-700 mb-2">신고 사유를 선택하세요:</label>
-                                                    <select
-                                                        value={reportReason}
-                                                        onChange={(e) => setReportReason(e.target.value)}
-                                                        className="border rounded p-2 mb-4"
-                                                    >
-                                                        <option value="">선택하세요</option>
-                                                        {reportReasons.map((reason, index) => (
-                                                            <option key={index} value={reason}>{reason}</option>
-                                                        ))}
-                                                    </select>
-                                                    <div className='flex justify-end mt-4'>
-                                                        <button type="submit" className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded">
-                                                            신고하기
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setReportingPostId(null)}
-                                                            className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded">
-                                                            취소
-                                                        </button>
+                                            <div>
+                                                <PostOptions
+                                                    postUserId={p.userId ?? ''}
+                                                    currentId={currentUserId}
+                                                    onEdit={() => { router.push(`/post/${restaurantId}/update/${p.id}`) }}
+                                                    onDelete={() => handleDeleteClick(p.id)}
+                                                    onReport={() => handleReportClick(p.id)}
+                                                />
+                                                <Modal isOpen={alertOpen} onClose={() => setAlertOpen(false)}>
+                                                    <div className="p-4 text-center mt-5">
+                                                        <h3 className="font-semibold text-lg">{alertMessage}</h3>
+                                                        {modalType === "report" && (
+                                                            <div className='mt-4'>
+                                                                <select
+                                                                    value={reportReason}
+                                                                    onChange={(e) => setReportReason(e.target.value)}
+                                                                    className="border rounded p-2 mb-4"
+                                                                >
+                                                                    <option value="">선택하세요</option>
+                                                                    {reportReasons.map((reason, index) => (
+                                                                        <option key={index} value={reason}>{reason}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex justify-center mt-4">
+                                                            <button
+                                                                className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition duration-200 mr-4"
+                                                                onClick={handleConfirmAction}
+                                                            >
+                                                                확인
+                                                            </button>
+                                                            <button
+                                                                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
+                                                                onClick={() => setAlertOpen(false)}
+                                                            >
+                                                                취소
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                </form>
+                                                </Modal>
                                             </div>
-                                        )}
+                                        </div>
 
                                         <div className="flex items-center space-x-6">
                                             <div className="flex items-center">
@@ -565,3 +576,4 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
 };
 
 export default PostList
+
