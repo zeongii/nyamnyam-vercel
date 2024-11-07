@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/app/model/user.model";
 import Account from "../../user/account/page";
+import useModalAlert from "@/app/context/useModalAlert";
 
 export default function TodayPost() {
     const [todayPosts, setTodayPosts] = useState<PostModel[]>([]);
@@ -197,8 +198,9 @@ export default function TodayPost() {
     };
 
     const openUserModal = async (userId: string) => {
+        const {showModalAlert} = useModalAlert();
         try {
-            const user = await getUserById(userId);
+            const user = await getUserById(userId,showModalAlert);
             setSelectedUser(user);
             setIsUserOpen(true);
         } catch (error) {

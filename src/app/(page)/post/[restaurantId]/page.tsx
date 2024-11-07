@@ -27,8 +27,9 @@ import { PostListProps } from '@/app/model/props';
 import nookies from 'nookies';
 import { User } from "@/app/model/user.model";
 import Account from "@/app/(page)/user/account/page";
+import { getUserById, increaseScore, decreaseScore } from "@/app/service/user/user.service";
 import ReplyHandler from './reply/page';
-import { increaseScore } from '@/app/service/user/user.service';
+import useModalAlert from "@/app/context/useModalAlert";
 
 const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
     const [posts, setPosts] = useState<PostModel[]>([]);
@@ -260,6 +261,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
 
     // 좋아요 & 취소 & count
     const handleLike = async (postId: number, postUserId: string) => {
+        const {showModalAlert} = useModalAlert();
         if (postUserId === currentUserId) {
             window.alert("본인의 리뷰에는 좋아요를 누를 수 없어요.");
             return;
@@ -274,18 +276,18 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
                 [postId]: (prevCounts[postId] || 0) + result.likeCountDelta,
             }));
 
-            // 좋아요 추가 또는 취소에 따라 점수 업데이트 호출
             if (result.likeCountDelta > 0) {
-                await increaseScore(postUserId); // 좋아요 추가 시
+                await increaseScore(postUserId, showModalAlert);
             } else {
-                await decreaseScore(postUserId); // 좋아요 취소 시
+                await decreaseScore(postUserId, showModalAlert);
             }
         }
     };
 
     const openUserModal = async (userId: string) => {
+        const {showModalAlert} = useModalAlert();
         try {
-            const user = await getUserById(userId);
+            const user = await getUserById(userId, showModalAlert);
             setSelectedUser(user);
             setIsUserOpen(true);
         } catch (error) {
@@ -576,4 +578,3 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
 };
 
 export default PostList
-
