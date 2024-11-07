@@ -164,4 +164,3 @@ export const decreaseScore = async (userId: string, showModalAlert: (msg: string
         throw error;
     }
 };
-

@@ -27,8 +27,8 @@ import { PostListProps } from '@/app/model/props';
 import nookies from 'nookies';
 import { User } from "@/app/model/user.model";
 import Account from "@/app/(page)/user/account/page";
-import { getUserById, increaseScore, decreaseScore } from "@/app/service/user/user.service";
 import ReplyHandler from './reply/page';
+import { increaseScore } from '@/app/service/user/user.service';
 
 const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
     const [posts, setPosts] = useState<PostModel[]>([]);
