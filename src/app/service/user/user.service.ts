@@ -147,20 +147,18 @@ export const toggleEnable = async (userId: string, enabled: boolean, showModalAl
     }
 };
 
-export const increaseScore = async (userId: string, showModalAlert: (msg: string) => void): Promise<void> => {
+export const increaseScore = async (userId: string): Promise<void> => {
     try {
         await increaseScoreApi(userId);
     } catch (error: any) {
-        showModalAlert(error);
         throw error;
     }
 };
 
-export const decreaseScore = async (userId: string, showModalAlert: (msg: string) => void): Promise<void> => {
+export const decreaseScore = async (userId: string): Promise<void> => {
     try {
         await decreaseScoreApi(userId);
     } catch (error: any) {
-        showModalAlert(error);
         throw error;
     }
 };
