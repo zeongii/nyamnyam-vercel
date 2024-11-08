@@ -224,7 +224,7 @@ export default function PostUpdate() {
               className='flex flex-col items-center justify-center cursor-pointer text-gray-500 z-10 w-full'
               style={{ minHeight: '30px' }}>
               <Camera size={32} className='mb-2' color="#4B5563" weight="fill" />
-              <span className='font-medium'>사진 첨부하기</span>
+              <span className='font-medium'>마우스로 파일을 끌고 오거나 여기를 클릭하세요.</span>
             </label>
           </div>
         </div>
