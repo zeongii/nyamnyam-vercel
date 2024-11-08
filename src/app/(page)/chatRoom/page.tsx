@@ -184,7 +184,6 @@ export default function Home1() {
 
 
 
-
     // 메시지 전송 함수
     // sendMessage 함수에서 새로운 메시지를 보낼 때 호출
     const sendMessage = async (e: React.FormEvent) => {
