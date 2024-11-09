@@ -78,17 +78,23 @@ const UserTable = ({ users = [], onUpdateUsers }) => {
                     <th className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
                         Enable
                     </th>
-                    <th className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
-                        Username
+                    <th scope="col"
+                        className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                        username
                     </th>
-                    <th className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
-                        Nickname
+                    <th scope="col"
+                        className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                        nickname
                     </th>
-                    <th className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
-                        Role
+                    <th scope="col"
+                        className="pb-3 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                        onClick={() => handleSort('role')}>
+                        role
                     </th>
-                    <th className="pb-3 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">
-                        Score
+                    <th scope="col"
+                        className="pb-3 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                        onClick={() => handleSort('score')}>
+                        score
                     </th>
                 </tr>
                 </thead>
@@ -102,32 +108,23 @@ const UserTable = ({ users = [], onUpdateUsers }) => {
                                 onChange={() => handleToggleEnable(u.id, u.enabled)}
                             />
                         </td>
-                        <td className="py-3 text-left">
-                            <strong
-                                className="text-title cursor-pointer"
-                                onClick={() => openModal(u)} // Username 클릭 시에만 모달이 열립니다.
-                            >
-                                {u.username}
-                            </strong>
+                        <th scope="row" className="py-3 text-left" onClick={() => openModal(u)}>
+                            <strong className="text-title cursor-pointer">{u.username}</strong>
+                        </th>
+                        <td className="py-3 cursor-pointer">
+                            <div className="info flex flex-col">
+                                <strong className="product_name text-button">{u.nickname}</strong>
+                            </div>
                         </td>
-                        <td className="py-3">{u.nickname}</td>
-                        <td className="py-3">{u.role}</td>
+                        <td className="py-3 price">{u.role}</td>
                         <td className="py-3 text-right">
                                 <span
-                                    className={`tag px-4 py-1.5 rounded-full bg-opacity-10 ${
-                                        u.score < 40
-                                            ? "bg-sky-500 text-sky-500"
-                                            : u.score < 50
-                                                ? "bg-green-400 text-green-400"
-                                                : u.score < 60
-                                                    ? "bg-yellow-500 text-yellow-500"
-                                                    : u.score < 80
-                                                        ? "bg-orange-400 text-orange-400"
-                                                        : u.score < 100
-                                                            ? "bg-red-500 text-red-500"
-                                                            : "bg-gray text-gray"
-                                    } caption1 font-semibold`}
-                                >
+                                    className={`tag px-4 py-1.5 rounded-full bg-opacity-10 ${u.score < 40 ? 'bg-sky-500 text-sky-500' :
+                                        u.score < 50 ? 'bg-green-400 text-green-400' :
+                                            u.score < 60 ? 'bg-yellow-500 text-yellow-500' :
+                                                u.score < 80 ? 'bg-orange-400 text-orange-400' :
+                                                    u.score < 100 ? 'bg-red-500 text-red-500' :
+                                                        'bg-gray text-gray'} caption1 font-semibold`}>
                                     {u.score}
                                 </span>
                         </td>
@@ -136,17 +133,19 @@ const UserTable = ({ users = [], onUpdateUsers }) => {
                 </tbody>
             </table>
             <div className="pagination mt-4 flex justify-between">
-                <button onClick={handlePrevious} disabled={currentPage === 1} className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
+                <button onClick={handlePrevious} disabled={currentPage === 1}
+                        className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
                     이전
                 </button>
                 <span>페이지 {currentPage} / {totalPages}</span>
-                <button onClick={handleNext} disabled={currentPage === totalPages} className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
+                <button onClick={handleNext} disabled={currentPage === totalPages}
+                        className="bg-[#4fc8cc] text-white py-1 px-3 rounded">
                     다음
                 </button>
             </div>
 
             <Modal isOpen={isModalOpen} onClose={closeModal}>
-                {selectedUser && <Account selectUser={selectedUser} />}
+                {selectedUser && <Account selectUser={selectedUser}/>}
             </Modal>
         </div>
     );
@@ -165,7 +164,7 @@ export default function UserList() {
 
     return (
         <div>
-            <UserTable users={users} onUpdateUsers={setUsers} />
+            <UserTable users={users} onUpdateUsers={setUsers}/>
         </div>
     );
 }
