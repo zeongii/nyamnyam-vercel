@@ -24,9 +24,10 @@ import DashBoard from "src/app/(page)/admin/dashboard/page";
 import {fetchReportCountAll, fetchReportList} from "src/app/service/report/report.service";
 import {ReportModel} from "src/app/model/report.model";
 import UserList from "@/app/(page)/user/userList/page";
-import {fetchAllUsers} from "@/app/api/user/user.api";
+import {fetchAllUsers, fetchUserById} from "@/app/api/user/user.api";
 import {User} from "@/app/model/user.model";
 import {PostModel} from "@/app/model/post.model";
+import nookies from "nookies";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, ArcElement, CategoryScale, LinearScale, PointElement, LineElement);
 
@@ -37,19 +38,17 @@ export default function AdminDash() {
     const [reportCountList, setReportCountList] = useState<ReportCountModel[]>([]);
     const [reportList, setReportList] = useState<ReportModel[]>([]);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-    const [user, setUser] = useState<User[]>([]);
+    const [userList, setUserList] = useState<User[]>([]);
     const [todayPost, setTodayPost] = useState<PostModel[]>([]);
-    const [role, setRole] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
 
 
-
-    const handleRowClick = (index: number) => {
-        setOpenIndex(openIndex === index ? null : index);
-    };
+    const cookie = nookies.get();
+    const userId = cookie.userId;
 
 
     useEffect(() => {
-        const list = async () => {
+        const fetchData = async () => {
             const countData = await fetchShowCount();
             setCount(countData);
 
@@ -60,20 +59,18 @@ export default function AdminDash() {
             setReportList(listData);
 
             const userData = await fetchAllUsers();
-            setUser(userData);
+            setUserList(userData);
 
             const todayData = await fetchCurrentPost();
             setTodayPost(todayData);
 
-            const storedRole = localStorage.getItem('role');
-            if (storedRole) {
-                setRole(storedRole);
-            }
+            const myInfo = await fetchUserById(userId);
+            setUser(myInfo);
 
         };
 
-        list();
-    }, []);
+        fetchData();
+    }, [userId]);
 
 
 
@@ -90,24 +87,21 @@ export default function AdminDash() {
         ],
     };
 
-    const totalUser = user.length;
+    const totalUser = userList.length;
     const totalTodayPost = todayPost.length;
 
-  
 
-    if (role !== 'ADMIN') {
-        return (
-            
-            <div className="unauthorized text-center mt-5">
-                <h2>권한이 없습니다</h2>
-                <p>You do not have permission to view this content.</p>
-            </div>
-        );
-    }
+    const handleRowClick = (index: number) => {
+        setOpenIndex(openIndex === index ? null : index);
+    };
+
 
     return (
         <>
-
+            {user?.role !== 'ADMIN' ? (
+                <div className="unauthorized text-center mt-5">
+                </div>
+                ) : (
             <div className="profile-block md:py-20 py-10 md:px-8 px-4 mt-10">
                 <div className="container">
                     <div className="content-main flex gap-y-8 max-md:flex-col w-full">
@@ -124,9 +118,9 @@ export default function AdminDash() {
                                             className='md:w-[140px] w-[120px] md:h-[140px] h-[120px] rounded-full'
                                         />
                                     </div>
-                                    <div className="name heading6 mt-4 text-center">Tony Nguyen</div>
+                                    <div className="name heading6 mt-4 text-center">{user.nickname}</div>
                                     <div
-                                        className="mail heading6 font-normal normal-case text-secondary text-center mt-1">hi.avitex@gmail.com
+                                        className="mail heading6 font-normal normal-case text-secondary text-center mt-1">Role : {user.role}
                                     </div>
                                 </div>
                                 <div className="menu-tab w-full max-w-none lg:mt-10 mt-6">
@@ -288,9 +282,9 @@ export default function AdminDash() {
                     </div>
                 </div>
             </div>
+            )}
         </>
     )
 
 
 }
-

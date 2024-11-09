@@ -309,7 +309,9 @@ export default function Home1() {
               <div className="chat-user-list__box" style={{ width: '90%', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '16px', backgroundColor: '#F9F9F9', height: '800px', overflowY: 'auto' }}>
                 {/* Header */}
                 <div className="chat-user-list__head" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                 
+                  <div className="avatar">
+                    <Image src="/assets/img/profile.png" alt="profile" width={40} height={40} style={{ borderRadius: '50%' }} />
+                  </div>
                   <h2 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 'bold', color: '#4A4A4A' }}>Chat Rooms</h2>
                 </div>
                 <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} /> {/* 구분선 추가 */}
@@ -354,9 +356,6 @@ export default function Home1() {
                         <React.Fragment key={room.id}>
                           <li>
                             <div className="user-item --active" style={{ padding: '10px 0', backgroundColor: '#FFFFFF', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
-<<<<<<< HEAD
-                              
-=======
                               {/* <div className="user-item__avatar">
                                                             {user ? (
                                                                 <Link href={`/user/mypage/${user?.userId}`} className="profile">
@@ -364,7 +363,6 @@ export default function Home1() {
                                                                 </Link>
                                                             ) : null}
                                                         </div> */}
->>>>>>> b61097c6e7d4562d93388b9d4cf1de2a6f347a44
                               <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginLeft: '10px' }}>
                                 <a
                                   href="#"
@@ -425,13 +423,9 @@ export default function Home1() {
               >
                 {selectedChatRoomId ? (
                   <div className="user-item">
-<<<<<<< HEAD
-                   
-=======
                     {/* <div className="user-item__avatar">
                                         <Image src="/assets/img/user-list-4.png" alt="user" width={40} height={40} />
                                     </div> */}
->>>>>>> b61097c6e7d4562d93388b9d4cf1de2a6f347a44
                     <div className="user-item__desc" style={{ width: '100%' }}>
                       <div
                         className="user-item__name"

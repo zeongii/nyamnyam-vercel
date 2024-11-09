@@ -68,7 +68,7 @@ export const addUser = async (
 
     if (thumbnails.length > 0) {
         try {
-            const imgIds = await uploadThumbnailApi(thumbnails);
+            const imgIds = await uploadThumbnailApi(user.id ,thumbnails);
             user.imgId = imgIds.length > 0 ? imgIds[0].toString() : null;
         } catch (error) {
             console.error('Thumbnail upload failed:', error);
@@ -83,5 +83,3 @@ export const addUser = async (
 export const authenticateUser = async (username: string, password: string): Promise<string> => {
     return await loginUser(username, password);
 };
-
-
