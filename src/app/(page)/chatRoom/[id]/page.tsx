@@ -30,6 +30,7 @@ export default function Home1() {
   const [unreadCount, setUnreadCount] = useState<number>(0); // 읽지 않은 메시지 수
   const [selectChatRooms, setSelectChatRooms] = useState<any[]>([]);
   const [readBy, setReadBy] = useState<{ [key: string]: boolean }>({}); // 메시지 읽음 상태 관리
+  const messageEndRef = useRef(null); // 메시지 컨테이너의 끝을 참조할 ref 생성
   const formatTime = (date) => {
     // date가 문자열이라면 Date 객체로 변환
     const validDate = (typeof date === 'string' || date instanceof Date) ? new Date(date) : null;
@@ -103,60 +104,69 @@ export default function Home1() {
     fetchUnreadCounts();
   }, [sender, chatRooms]);
 
+
+  const scrollToBottom = () => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // 선택된 채팅방의 메시지를 가져오고 읽음 상태 처리하기
   useEffect(() => {
     if (!selectedChatRoomId) return;
 
-    // 채팅방 정보 가져오기
-    getChatRoomDetails(selectedChatRoomId)
-      .then((data) => {
+    const fetchChatRoomDetails = async () => {
+      try {
+        const data = await getChatRoomDetails(selectedChatRoomId);
         setSelectedChatRoom(data);
-        setMessages(data.messages || []); // 초기 메시지 설정
-        setUnreadCount(0); // 채팅방 열 때 unreadCount를 0으로 설정
+        setMessages(data.messages || []);
+        setUnreadCount(0);
 
-        // 읽지 않은 메시지 수를 0으로 설정
-        setChatRooms((prevRooms) =>
-          prevRooms.map((room) =>
-            room.id === selectedChatRoomId ? { ...room, unreadCount: 0 } : room
-          )
-        );
+        // 읽지 않은 메시지들을 읽음 상태로 업데이트
+        if (data.messages && Array.isArray(data.messages)) {
+          const unreadMessages = data.messages.filter(
+            (message) => !message.readBy?.[sender]
+          );
 
-        // 채팅방에 있는 모든 메시지를 읽음으로 마킹 처리
-        data.messages.forEach((message) => {
-          const isRead = message.readBy ? message.readBy[sender] : false; // null 체크
-          if (!isRead) {
-            markMessageAsRead(message.id, sender)
-              .then(() => {
-                // 읽음 상태 업데이트
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === message.id
-                      ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
-                      : msg
-                  )
-                );
-              })
-              .catch((error) => console.error('Failed to mark message as read:', error));
+          // 읽음 처리 및 상태 업데이트
+          for (const message of unreadMessages) {
+            await markMessageAsRead(message.id, sender);
           }
-        });
-      })
-      .catch((error) => console.error(error));
+
+          // 읽음 상태로 업데이트된 메시지 목록 설정
+          setMessages((prev) =>
+            prev.map((msg) =>
+              unreadMessages.some((m) => m.id === msg.id)
+                ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
+                : msg
+            )
+          );
+
+          // 선택된 채팅방의 unreadCount 업데이트
+          setChatRooms((prevRooms) =>
+            prevRooms.map((room) =>
+              room.id === selectedChatRoomId ? { ...room, unreadCount: 0 } : room
+            )
+          );
+
+          // 메시지를 로드한 후 가장 아래로 스크롤
+          scrollToBottom();
+        }
+      } catch (error) {
+        console.error('Failed to fetch chat room details:', error);
+      }
+    };
+
+    fetchChatRoomDetails();
 
     // 메시지 스트리밍 구독
-    const unsubscribe = subscribeToChats(selectedChatRoomId, (newMessage) => {
+    const unsubscribe = subscribeToChats(selectedChatRoomId, async (newMessage) => {
       setMessages((prevMessages) => {
-        // 새 메시지가 이미 존재하는지 확인
-        const messageExists = prevMessages.some(msg => msg.id === newMessage.id);
-        if (!messageExists) {
-          // 새 메시지를 기존 메시지 목록에 추가
-          const updatedMessages = [...prevMessages, newMessage];
-
-          // 새 메시지를 읽음으로 마킹 처리
-          const isRead = newMessage.readBy ? newMessage.readBy[sender] : false; // null 체크
-          if (!isRead) {
+        if (!prevMessages.some((msg) => msg.id === newMessage.id)) {
+          // 새로운 메시지를 읽음으로 마킹
+          if (!newMessage.readBy?.[sender]) {
             markMessageAsRead(newMessage.id, sender)
               .then(() => {
-                // 읽음 상태 업데이트
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === newMessage.id
@@ -164,26 +174,25 @@ export default function Home1() {
                       : msg
                   )
                 );
-                // 채팅방의 unreadCount를 업데이트
                 setChatRooms((prevChatRooms) =>
                   prevChatRooms.map((room) =>
                     room.id === selectedChatRoomId
-                      ? { ...room, unreadCount: Math.max(room.unreadCount - 1, 0) } // unreadCount 감소
+                      ? { ...room, unreadCount: Math.max(room.unreadCount - 1, 0) }
                       : room
                   )
                 );
               })
-              .catch((error) => console.error('Failed to mark message as read:', error));
+              .catch((error) => console.error('Failed to mark new message as read:', error));
           }
-
-          return updatedMessages; // 새 메시지 추가
+          scrollToBottom(); // 새 메시지가 추가될 때마다 아래로 스크롤
+          return [...prevMessages, newMessage];
         }
-        return prevMessages; // 메시지가 이미 존재하면 상태를 그대로 반환
+        return prevMessages;
       });
     });
 
     return () => {
-      unsubscribe(); // 컴포넌트 언마운트 시 구독 취소
+      unsubscribe();
     };
   }, [selectedChatRoomId]);
 
@@ -348,9 +357,13 @@ export default function Home1() {
                         <React.Fragment key={room.id}>
                           <li>
                             <div className="user-item --active" style={{ padding: '10px 0', backgroundColor: '#FFFFFF', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
-                              <div className="user-item__avatar">
-                                <Image src="/assets/img/user-list-1.png" alt="user" width={40} height={40} style={{ borderRadius: '50%' }} />
-                              </div>
+                              {/* <div className="user-item__avatar">
+                                                            {user ? (
+                                                                <Link href={`/user/mypage/${user?.userId}`} className="profile">
+                                                                    <img src="/assets/img/profile.png" alt="profile" />
+                                                                </Link>
+                                                            ) : null}
+                                                        </div> */}
                               <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginLeft: '10px' }}>
                                 <a
                                   href="#"
@@ -411,9 +424,9 @@ export default function Home1() {
               >
                 {selectedChatRoomId ? (
                   <div className="user-item">
-                    <div className="user-item__avatar">
-                      <Image src="/assets/img/user-list-4.png" alt="user" width={40} height={40} />
-                    </div>
+                    {/* <div className="user-item__avatar">
+                                        <Image src="/assets/img/user-list-4.png" alt="user" width={40} height={40} />
+                                    </div> */}
                     <div className="user-item__desc" style={{ width: '100%' }}>
                       <div
                         className="user-item__name"
@@ -563,7 +576,7 @@ export default function Home1() {
                       </button>
 
                       {showEmojiPicker && (
-                        <div ref={emojiPickerRef} className="absolute bottom-16 left-0 z-50 bg-white shadow-lg p-2 rounded">
+                        <div ref={emojiPickerRef} className="absolute bottom-16 left-25 z-50 bg-white shadow-lg p-2 rounded">
                           <EmojiPicker onSelectEmoji={handleEmojiSelect} />
                         </div>
                       )}

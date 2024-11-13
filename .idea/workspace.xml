@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="" />
+=======
+    <list default="true" id="49786053-a601-4996-9fe6-17ac685f1975" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(page)/chatRoom/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/chatRoom/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(page)/chatRoom/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(page)/chatRoom/page.tsx" afterDir="false" />
+    </list>
+>>>>>>> release0.08
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -53,6 +61,7 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -69,8 +78,26 @@
     "run.code.analysis.last.selected.profile": "pProject Default",
     "ts.external.directory.path": "C:\\Users\\bitcamp\\Documents\\GitHub\\nyamnyam-front\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
+=======
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;release0.08&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/bitcamp/team/release/nyamnyam-kr&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\bitcamp\\team\\release\\nyamnyam-frontrelease0.08\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+>>>>>>> release0.08
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\USER\Documents\nyamnyam\nyamnyam-front\src\app\(page)\notice\details\[id]" />
@@ -152,9 +179,15 @@
       <workItem from="1728952929892" duration="4347000" />
       <workItem from="1728969248517" duration="2873000" />
       <workItem from="1728989962295" duration="171000" />
+<<<<<<< HEAD
       <workItem from="1729212065738" duration="6194000" />
       <workItem from="1730774688158" duration="2587000" />
       <workItem from="1730862709401" duration="10512000" />
+=======
+      <workItem from="1729220647301" duration="16000" />
+      <workItem from="1730270663547" duration="21000" />
+      <workItem from="1730970253721" duration="1595000" />
+>>>>>>> release0.08
     </task>
     <servers />
   </component>
