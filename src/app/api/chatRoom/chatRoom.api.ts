@@ -4,8 +4,8 @@ import { ChatRoomModel } from "@/app/model/chatRoom.model";
 let token: string | null = null;
 
 if (typeof window !== "undefined") {
-    // 브라우저 환경에서만 localStorage 접근
-    token = localStorage.getItem('token');
+  // 브라우저 환경에서만 localStorage 접근
+  token = localStorage.getItem('token');
 }
 
 export async function insertChatRoom(chatRoom: ChatRoomModel): Promise<any | { status: number; data?: any; message?: string }> {
@@ -15,7 +15,7 @@ export async function insertChatRoom(chatRoom: ChatRoomModel): Promise<any | { s
       headers: {
         'Authorization': token ? `Bearer ${token}` : '',
         "Content-Type": "application/json",
-    },
+      },
       body: JSON.stringify(chatRoom)
     });
 
@@ -36,7 +36,7 @@ export async function checkChatRoom(chatRoom: ChatRoomModel): Promise<any | { st
       headers: {
         'Authorization': token ? `Bearer ${token}` : '',
         "Content-Type": "application/json",
-    },
+      },
       body: JSON.stringify(chatRoom)
     });
 
@@ -67,7 +67,7 @@ export const fetchChatRooms = async (nickname: any) => {
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-  },
+    },
     mode: 'cors', // CORS 요청 모드 설정
     credentials: 'include', // 쿠키나 인증 정보 포함 여부 설정
   });
@@ -86,7 +86,7 @@ export const fetchChatRoomCount = async () => {
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-  },
+    },
   });
   if (!response.ok) {
     throw new Error('Network response was not ok');
@@ -101,7 +101,7 @@ export const fetchChatRoomById = async (chatRoomId: any) => {
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
       "Content-Type": "application/json",
-  },
+    },
   });
   if (!response.ok) {
     throw new Error("채팅방 정보를 가져오는 중 오류 발생");

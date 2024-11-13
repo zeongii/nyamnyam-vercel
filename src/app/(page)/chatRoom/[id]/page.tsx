@@ -13,7 +13,6 @@ import { getUnreadCount, markMessageAsRead, subscribeToChats } from "src/app/api
 import React from "react";
 import { ChatRooms } from "@/app/components/ChatRooms";
 
-
 export default function Home1() {
   const [chatRooms, setChatRooms] = useState<ChatRoomModel[]>([]);
   const [selectedChatRoomId, setSelectedChatRoomId] = useState<string | null>(null);
@@ -89,10 +88,10 @@ export default function Home1() {
     const fetchUnreadCounts = async () => {
       try {
         const updatedChatRooms = await Promise.all(
-          chatRooms.map(async (room) => {
-            const unreadCountResult = await getUnreadCount(room.id, sender);
-            return { ...room, unreadCount: unreadCountResult };
-          })
+            chatRooms.map(async (room) => {
+              const unreadCountResult = await getUnreadCount(room.id, sender);
+              return { ...room, unreadCount: unreadCountResult };
+            })
         );
 
         setChatRooms(updatedChatRooms);
@@ -125,7 +124,7 @@ export default function Home1() {
         // 읽지 않은 메시지들을 읽음 상태로 업데이트
         if (data.messages && Array.isArray(data.messages)) {
           const unreadMessages = data.messages.filter(
-            (message) => !message.readBy?.[sender]
+              (message) => !message.readBy?.[sender]
           );
 
           // 읽음 처리 및 상태 업데이트
@@ -135,18 +134,18 @@ export default function Home1() {
 
           // 읽음 상태로 업데이트된 메시지 목록 설정
           setMessages((prev) =>
-            prev.map((msg) =>
-              unreadMessages.some((m) => m.id === msg.id)
-                ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
-                : msg
-            )
+              prev.map((msg) =>
+                  unreadMessages.some((m) => m.id === msg.id)
+                      ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
+                      : msg
+              )
           );
 
           // 선택된 채팅방의 unreadCount 업데이트
           setChatRooms((prevRooms) =>
-            prevRooms.map((room) =>
-              room.id === selectedChatRoomId ? { ...room, unreadCount: 0 } : room
-            )
+              prevRooms.map((room) =>
+                  room.id === selectedChatRoomId ? { ...room, unreadCount: 0 } : room
+              )
           );
 
           // 메시지를 로드한 후 가장 아래로 스크롤
@@ -166,23 +165,23 @@ export default function Home1() {
           // 새로운 메시지를 읽음으로 마킹
           if (!newMessage.readBy?.[sender]) {
             markMessageAsRead(newMessage.id, sender)
-              .then(() => {
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === newMessage.id
-                      ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
-                      : msg
-                  )
-                );
-                setChatRooms((prevChatRooms) =>
-                  prevChatRooms.map((room) =>
-                    room.id === selectedChatRoomId
-                      ? { ...room, unreadCount: Math.max(room.unreadCount - 1, 0) }
-                      : room
-                  )
-                );
-              })
-              .catch((error) => console.error('Failed to mark new message as read:', error));
+                .then(() => {
+                  setMessages((prev) =>
+                      prev.map((msg) =>
+                          msg.id === newMessage.id
+                              ? { ...msg, isRead: true, readBy: { ...msg.readBy, [sender]: true } }
+                              : msg
+                      )
+                  );
+                  setChatRooms((prevChatRooms) =>
+                      prevChatRooms.map((room) =>
+                          room.id === selectedChatRoomId
+                              ? { ...room, unreadCount: Math.max(room.unreadCount - 1, 0) }
+                              : room
+                      )
+                  );
+                })
+                .catch((error) => console.error('Failed to mark new message as read:', error));
           }
           scrollToBottom(); // 새 메시지가 추가될 때마다 아래로 스크롤
           return [...prevMessages, newMessage];
@@ -260,7 +259,7 @@ export default function Home1() {
         await deleteChatRoomsService(selectChatRooms, nickname);
         alert("채팅방이 삭제되었습니다.");
         setChatRooms(prevChatRooms =>
-          prevChatRooms.filter(room => !selectChatRooms.includes(room.id))
+            prevChatRooms.filter(room => !selectChatRooms.includes(room.id))
         );
         setSelectChatRooms([]);
       } catch (error) {
@@ -276,335 +275,335 @@ export default function Home1() {
 
     // 채팅방 이름과 참가자 목록에서 검색어가 포함된 항목을 필터링
     return (
-      room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      participantsStr.includes(searchTerm.toLowerCase())
+        room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        participantsStr.includes(searchTerm.toLowerCase())
     );
   });
 
   return (
-    <>
-      <Head>
-        <meta charSet="utf-8" />
-        <title>냠냠</title>
-        <meta name="author" content="Templines" />
-        <meta name="description" content="TeamHost" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="HandheldFriendly" content="true" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon" />
+      <>
+        <Head>
+          <meta charSet="utf-8" />
+          <title>냠냠</title>
+          <meta name="author" content="Templines" />
+          <meta name="description" content="TeamHost" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta name="HandheldFriendly" content="true" />
+          <meta name="format-detection" content="telephone=no" />
+          <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+          <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon" />
 
-        {/* CSS Files */}
-        <link rel="stylesheet" href="/assets/css/libs.min.css" />
-        <link rel="stylesheet" href="/assets/css/main.css" />
+          {/* CSS Files */}
+          <link rel="stylesheet" href="/assets/css/libs.min.css" />
+          <link rel="stylesheet" href="/assets/css/main.css" />
 
-        {/* Google Fonts */}
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet" />
-      </Head>
-      <main className="page-main">
-        <h3 className="uk-text-lead">Chats</h3>
-        <div className="uk-grid uk-grid-small" data-uk-grid>
-          <div className="uk-width-1-3@l">
-            <div className="chat-user-list">
-              <div className="chat-user-list__box" style={{ width: '90%', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '16px', backgroundColor: '#F9F9F9', height: '800px', overflowY: 'auto' }}>
-                {/* Header */}
-                <div className="chat-user-list__head" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                  <div className="avatar">
-                    <Image src="/assets/img/profile.png" alt="profile" width={40} height={40} style={{ borderRadius: '50%' }} />
+          {/* Google Fonts */}
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+          <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet" />
+        </Head>
+        <main className="page-main">
+          <h3 className="uk-text-lead">Chats</h3>
+          <div className="uk-grid uk-grid-small" data-uk-grid>
+            <div className="uk-width-1-3@l">
+              <div className="chat-user-list">
+                <div className="chat-user-list__box" style={{ width: '90%', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '16px', backgroundColor: '#F9F9F9', height: '800px', overflowY: 'auto' }}>
+                  {/* Header */}
+                  <div className="chat-user-list__head" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                    <div className="avatar">
+                      <Image src="/assets/img/profile.png" alt="profile" width={40} height={40} style={{ borderRadius: '50%' }} />
+                    </div>
+                    <h2 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 'bold', color: '#4A4A4A' }}>Chat Rooms</h2>
                   </div>
-                  <h2 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 'bold', color: '#4A4A4A' }}>Chat Rooms</h2>
-                </div>
-                <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} /> {/* 구분선 추가 */}
+                  <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} /> {/* 구분선 추가 */}
 
-                {/* Search */}
-                <div className="chat-user-list__search" style={{ marginBottom: '8px' }}>
-                  <div className="search" style={{ position: 'relative' }}>
-                    <i className="ico_search" style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', color: '#888' }}></i>
-                    <input
-                      type="search"
-                      name="search"
-                      placeholder="Search"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px 10px 36px',
-                        borderRadius: '24px',
-                        border: '1px solid #ddd',
-                        fontSize: '14px',
-                        outline: 'none',
-                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                      }}
-                    />
+                  {/* Search */}
+                  <div className="chat-user-list__search" style={{ marginBottom: '8px' }}>
+                    <div className="search" style={{ position: 'relative' }}>
+                      <i className="ico_search" style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', color: '#888' }}></i>
+                      <input
+                          type="search"
+                          name="search"
+                          placeholder="Search"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px 10px 36px',
+                            borderRadius: '24px',
+                            border: '1px solid #ddd',
+                            fontSize: '14px',
+                            outline: 'none',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                          }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} /> {/* 구분선 추가 */}
+                  <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '8px 0' }} /> {/* 구분선 추가 */}
 
-                {/* Chat Room List */}
-                <div className="chat-user-list__body">
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {filteredChatRooms.map((room, index) => {
-                      const currentUserNickname = localStorage.getItem('nickname'); // 로그인한 유저의 닉네임
+                  {/* Chat Room List */}
+                  <div className="chat-user-list__body">
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {filteredChatRooms.map((room, index) => {
+                        const currentUserNickname = localStorage.getItem('nickname'); // 로그인한 유저의 닉네임
 
-                      // 로그인한 사용자 닉네임을 제외한 참가자 목록 생성
-                      const otherParticipants = room.participants.filter(participant => participant !== currentUserNickname);
+                        // 로그인한 사용자 닉네임을 제외한 참가자 목록 생성
+                        const otherParticipants = room.participants.filter(participant => participant !== currentUserNickname);
 
-                      // 참가자 목록을 문자열로 변환하여 출력
-                      const otherParticipantsStr = otherParticipants.length > 0 ? otherParticipants.join(', ') : "No Participants";
+                        // 참가자 목록을 문자열로 변환하여 출력
+                        const otherParticipantsStr = otherParticipants.length > 0 ? otherParticipants.join(', ') : "No Participants";
 
-                      return (
-                        <React.Fragment key={room.id}>
-                          <li>
-                            <div className="user-item --active" style={{ padding: '10px 0', backgroundColor: '#FFFFFF', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
-                              {/* <div className="user-item__avatar">
+                        return (
+                            <React.Fragment key={room.id}>
+                              <li>
+                                <div className="user-item --active" style={{ padding: '10px 0', backgroundColor: '#FFFFFF', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
+                                  {/* <div className="user-item__avatar">
                                                             {user ? (
                                                                 <Link href={`/user/mypage/${user?.userId}`} className="profile">
                                                                     <img src="/assets/img/profile.png" alt="profile" />
                                                                 </Link>
                                                             ) : null}
                                                         </div> */}
-                              <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginLeft: '10px' }}>
-                                <a
-                                  href="#"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    if (room && room.id) {
-                                      setSelectedChatRoomId(room.id);
-                                    }
-                                  }}
-                                  style={{ textDecoration: 'none', color: '#4A4A4A', flexGrow: 2, fontSize: '16px' }}
-                                >
-                                  <div className="user-item__name">
-                                    {/* 참가자 이름 출력 */}
-                                    {`${otherParticipantsStr} ${room.name}`}
+                                  <div className="user-item__desc" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginLeft: '10px' }}>
+                                    <a
+                                        href="#"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          if (room && room.id) {
+                                            setSelectedChatRoomId(room.id);
+                                          }
+                                        }}
+                                        style={{ textDecoration: 'none', color: '#4A4A4A', flexGrow: 2, fontSize: '16px' }}
+                                    >
+                                      <div className="user-item__name">
+                                        {/* 참가자 이름 출력 */}
+                                        {`${otherParticipantsStr} ${room.name}`}
+                                      </div>
+                                    </a>
                                   </div>
-                                </a>
-                              </div>
-                              <div className="user-item__info" style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                  <div className="user-item__info" style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                 <span
-                                  style={{
-                                    display: room.unreadCount > 0 ? 'inline-block' : 'none', // 0 이하일 때 숨김 처리
-                                    backgroundColor: 'red',
-                                    color: 'white',
-                                    padding: '2px 8px',
-                                    borderRadius: '6px', // 사각형 느낌을 더 주기 위해 값 감소
-                                    fontSize: '12px',
-                                    fontWeight: 'bold',
-                                    minWidth: '20px', // 최소 너비 설정
-                                    textAlign: 'center',
-                                    marginRight: '10px' // 배지와 체크박스 간의 간격 추가
-                                  }}
+                                    style={{
+                                      display: room.unreadCount > 0 ? 'inline-block' : 'none', // 0 이하일 때 숨김 처리
+                                      backgroundColor: 'red',
+                                      color: 'white',
+                                      padding: '2px 8px',
+                                      borderRadius: '6px', // 사각형 느낌을 더 주기 위해 값 감소
+                                      fontSize: '12px',
+                                      fontWeight: 'bold',
+                                      minWidth: '20px', // 최소 너비 설정
+                                      textAlign: 'center',
+                                      marginRight: '10px' // 배지와 체크박스 간의 간격 추가
+                                    }}
                                 >
                                   {room.unreadCount}
                                 </span>
-                                <ChatRooms
-                                  chatRoomId={room.id}
-                                  nickname={localStorage.getItem('nickname')}
-                                />
-                              </div>
-                            </div>
-                          </li>
-                        </React.Fragment>
-                      );
-                    })}
-                  </ul>
+                                    <ChatRooms
+                                        chatRoomId={room.id}
+                                        nickname={localStorage.getItem('nickname')}
+                                    />
+                                  </div>
+                                </div>
+                              </li>
+                            </React.Fragment>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="uk-width-2-3@l">
-            <div className="chat-box" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 1, margin: 1 }}>
-              <div
-                className="chat-messages-head"
-                style={{
-                  border: '1px solid #E0E0E0',  // 연한 회색 테두리
-                  borderRadius: '8px',          // 테두리 모서리 둥글게
-                }}
-              >
-                {selectedChatRoomId ? (
-                  <div className="user-item">
-                    {/* <div className="user-item__avatar">
+            <div className="uk-width-2-3@l">
+              <div className="chat-box" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 1, margin: 1 }}>
+                <div
+                    className="chat-messages-head"
+                    style={{
+                      border: '1px solid #E0E0E0',  // 연한 회색 테두리
+                      borderRadius: '8px',          // 테두리 모서리 둥글게
+                    }}
+                >
+                  {selectedChatRoomId ? (
+                      <div className="user-item">
+                        {/* <div className="user-item__avatar">
                                         <Image src="/assets/img/user-list-4.png" alt="user" width={40} height={40} />
                                     </div> */}
-                    <div className="user-item__desc" style={{ width: '100%' }}>
-                      <div
-                        className="user-item__name"
-                        style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#2c3e50' }}
-                      >
-                        {`${filteredChatRooms
-                          .find((room) => room.id === selectedChatRoomId)
-                          ?.participants.filter((participant) => participant !== localStorage.getItem('nickname'))
-                          .join(', ') || 'No Participants'} ${filteredChatRooms.find((room) => room.id === selectedChatRoomId)?.name || 'Unknown Room'}`}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <h3>선택된 채팅방이 없습니다.</h3>
-                )}
-              </div>
-
-              {selectedChatRoomId ? (
-                <>
-                  <div
-                    className="chat-messages-body flex-1 overflow-y-auto bg-white shadow-md rounded-lg space-y-4"
-                    style={{
-                      flexGrow: 1,
-                      padding: 3,  // padding을 0으로 설정하여 간격 없애기
-                      margin: 3,   // 추가적으로 margin도 없애기
-                      backgroundColor: '#F5F5F5'  // 더 연한 주황색 배경색 추가
-                    }}
-                  >
-                    {messages.map((msg, index) => (
-                      <div
-                        key={index}
-                        className={`message-container flex items-start ${msg.sender === sender ? 'justify-end' : 'justify-start'}`}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          marginBottom: '8px',
-                        }}
-                      >
-                        {msg.sender === sender ? (
-                          <>
-                            {/* 나머지 정보 (시간 및 unread 수) */}
-                            <div
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                paddingLeft: '8px',
-                                paddingTop: '4px', // 약간의 여백을 추가
-                                color: '#9E9E9E',
-                                justifyContent: 'space-between', // 빈 공간을 날짜와 unread 사이에 균등하게 배치
-                                height: '40px',  // 높이를 고정하여 위치 변경을 방지
-                              }}
-                            >
-                              <span
-                                style={{
-                                  visibility: countNotReadParticipants(msg) > 0 ? 'visible' : 'hidden',
-                                  color: '#D18F36',  // #FFECB3과 어울리는 부드러운 금색
-                                  fontSize: '0.8em',
-                                  textAlign: 'left',
-                                }}
-                              >
-                                {countNotReadParticipants(msg)}
-                              </span>
-                              <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
-                                {formatTime(new Date(msg.createdAt))}
-                              </span>
-                            </div>
-
-                            {/* 메시지 내용 박스 */}
-                            <div
-                              className="message-box"
-                              style={{
-                                maxWidth: '70%',
-                                padding: '8px 12px',
-                                borderRadius: '10px',
-                                backgroundColor: '#d1e7ff',
-                                textAlign: 'right',
-                              }}
-                            >
-                              <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
-                            </div>
-                          </>
-                        ) : (
-                          // 상대방이 보낸 메시지의 경우: 왼쪽에 닉네임, 메시지, 나머지 정보
-                          <>
-                            {/* 상대방 메시지의 경우 왼쪽에 닉네임 */}
-                            <div style={{ paddingRight: '8px', alignSelf: 'center', color: '#2c3e50', fontWeight: 'bold', fontSize: '0.8em' }}>
-                              {msg.sender}
-                            </div>
-
-                            {/* 메시지 내용 박스 */}
-                            <div
-                              className="message-box"
-                              style={{
-                                maxWidth: '70%',
-                                padding: '8px 12px',
-                                borderRadius: '10px',
-                                backgroundColor: '#FFECB3',
-                                textAlign: 'left',
-                              }}
-                            >
-                              <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
-                            </div>
-
-                            {/* 나머지 정보 (시간 및 unread 수) */}
-                            <div
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                paddingLeft: '8px',
-                                paddingTop: '4px', // 약간의 여백을 추가
-                                color: '#9E9E9E',
-                                justifyContent: 'space-between', // 빈 공간을 날짜와 unread 사이에 균등하게 배치
-                                height: '40px',  // 높이를 고정하여 위치 변경을 방지
-                              }}
-                            >
-                              <span
-                                style={{
-                                  visibility: countNotReadParticipants(msg) > 0 ? 'visible' : 'hidden',
-                                  color: '#FFD700',
-                                  fontSize: '0.8em',
-                                  textAlign: 'left',
-                                }}
-                              >
-                                {countNotReadParticipants(msg)}
-                              </span>
-                              <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
-                                {formatTime(new Date(msg.createdAt))}
-                              </span>
-                            </div>
-
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="chat-messages-footer bg-gray-100 p-4 rounded-b-lg">
-                    <form onSubmit={sendMessage} className="chat-messages-form flex">
-                      <button
-                        type="button"
-                        onClick={toggleEmojiPicker}
-                        className="emoji-picker-button p-2 mr-2 border border-gray-300 rounded"
-                      >
-                        😊
-                      </button>
-
-                      {showEmojiPicker && (
-                        <div ref={emojiPickerRef} className="absolute bottom-16 left-25 z-50 bg-white shadow-lg p-2 rounded">
-                          <EmojiPicker onSelectEmoji={handleEmojiSelect} />
+                        <div className="user-item__desc" style={{ width: '100%' }}>
+                          <div
+                              className="user-item__name"
+                              style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#2c3e50' }}
+                          >
+                            {`${filteredChatRooms
+                                .find((room) => room.id === selectedChatRoomId)
+                                ?.participants.filter((participant) => participant !== localStorage.getItem('nickname'))
+                                .join(', ') || 'No Participants'} ${filteredChatRooms.find((room) => room.id === selectedChatRoomId)?.name || 'Unknown Room'}`}
+                          </div>
                         </div>
-                      )}
+                      </div>
+                  ) : (
+                      <h3>선택된 채팅방이 없습니다.</h3>
+                  )}
+                </div>
 
-                      <input
-                        type="text"
-                        placeholder="Type your message..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        className="chat-messages-input flex-grow border border-gray-300 p-2 rounded-lg"
-                        required
-                      />
-
-                      <button
-                        type="submit"
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 ml-2 rounded-lg"
+                {selectedChatRoomId ? (
+                    <>
+                      <div
+                          className="chat-messages-body flex-1 overflow-y-auto bg-white shadow-md rounded-lg space-y-4"
+                          style={{
+                            flexGrow: 1,
+                            padding: 3,  // padding을 0으로 설정하여 간격 없애기
+                            margin: 3,   // 추가적으로 margin도 없애기
+                            backgroundColor: '#F5F5F5'  // 더 연한 주황색 배경색 추가
+                          }}
                       >
-                        Send
-                      </button>
-                    </form>
-                  </div>
-                </>
-              ) : null}
-            </div>
-          </div>
+                        {messages.map((msg, index) => (
+                            <div
+                                key={index}
+                                className={`message-container flex items-start ${msg.sender === sender ? 'justify-end' : 'justify-start'}`}
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'row',
+                                  marginBottom: '8px',
+                                }}
+                            >
+                              {msg.sender === sender ? (
+                                  <>
+                                    {/* 나머지 정보 (시간 및 unread 수) */}
+                                    <div
+                                        style={{
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          alignItems: 'center',
+                                          paddingLeft: '8px',
+                                          paddingTop: '4px', // 약간의 여백을 추가
+                                          color: '#9E9E9E',
+                                          justifyContent: 'space-between', // 빈 공간을 날짜와 unread 사이에 균등하게 배치
+                                          height: '40px',  // 높이를 고정하여 위치 변경을 방지
+                                        }}
+                                    >
+                              <span
+                                  style={{
+                                    visibility: countNotReadParticipants(msg) > 0 ? 'visible' : 'hidden',
+                                    color: '#D18F36',  // #FFECB3과 어울리는 부드러운 금색
+                                    fontSize: '0.8em',
+                                    textAlign: 'left',
+                                  }}
+                              >
+                                {countNotReadParticipants(msg)}
+                              </span>
+                                      <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
+                                {formatTime(new Date(msg.createdAt))}
+                              </span>
+                                    </div>
 
-        </div>
-      </main>
-    </>
+                                    {/* 메시지 내용 박스 */}
+                                    <div
+                                        className="message-box"
+                                        style={{
+                                          maxWidth: '70%',
+                                          padding: '8px 12px',
+                                          borderRadius: '10px',
+                                          backgroundColor: '#d1e7ff',
+                                          textAlign: 'right',
+                                        }}
+                                    >
+                                      <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
+                                    </div>
+                                  </>
+                              ) : (
+                                  // 상대방이 보낸 메시지의 경우: 왼쪽에 닉네임, 메시지, 나머지 정보
+                                  <>
+                                    {/* 상대방 메시지의 경우 왼쪽에 닉네임 */}
+                                    <div style={{ paddingRight: '8px', alignSelf: 'center', color: '#2c3e50', fontWeight: 'bold', fontSize: '0.8em' }}>
+                                      {msg.sender}
+                                    </div>
+
+                                    {/* 메시지 내용 박스 */}
+                                    <div
+                                        className="message-box"
+                                        style={{
+                                          maxWidth: '70%',
+                                          padding: '8px 12px',
+                                          borderRadius: '10px',
+                                          backgroundColor: '#FFECB3',
+                                          textAlign: 'left',
+                                        }}
+                                    >
+                                      <div style={{ fontSize: '0.9rem' }}>{msg.message}</div>
+                                    </div>
+
+                                    {/* 나머지 정보 (시간 및 unread 수) */}
+                                    <div
+                                        style={{
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          alignItems: 'center',
+                                          paddingLeft: '8px',
+                                          paddingTop: '4px', // 약간의 여백을 추가
+                                          color: '#9E9E9E',
+                                          justifyContent: 'space-between', // 빈 공간을 날짜와 unread 사이에 균등하게 배치
+                                          height: '40px',  // 높이를 고정하여 위치 변경을 방지
+                                        }}
+                                    >
+                              <span
+                                  style={{
+                                    visibility: countNotReadParticipants(msg) > 0 ? 'visible' : 'hidden',
+                                    color: '#FFD700',
+                                    fontSize: '0.8em',
+                                    textAlign: 'left',
+                                  }}
+                              >
+                                {countNotReadParticipants(msg)}
+                              </span>
+                                      <span style={{ color: '#B0B0B0', fontSize: '0.8em' }}>
+                                {formatTime(new Date(msg.createdAt))}
+                              </span>
+                                    </div>
+
+                                  </>
+                              )}
+                            </div>
+                        ))}
+                      </div>
+
+                      <div className="chat-messages-footer bg-gray-100 p-4 rounded-b-lg">
+                        <form onSubmit={sendMessage} className="chat-messages-form flex">
+                          <button
+                              type="button"
+                              onClick={toggleEmojiPicker}
+                              className="emoji-picker-button p-2 mr-2 border border-gray-300 rounded"
+                          >
+                            😊
+                          </button>
+
+                          {showEmojiPicker && (
+                              <div ref={emojiPickerRef} className="absolute bottom-16 left-25 z-50 bg-white shadow-lg p-2 rounded">
+                                <EmojiPicker onSelectEmoji={handleEmojiSelect} />
+                              </div>
+                          )}
+
+                          <input
+                              type="text"
+                              placeholder="Type your message..."
+                              value={newMessage}
+                              onChange={(e) => setNewMessage(e.target.value)}
+                              className="chat-messages-input flex-grow border border-gray-300 p-2 rounded-lg"
+                              required
+                          />
+
+                          <button
+                              type="submit"
+                              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 ml-2 rounded-lg"
+                          >
+                            Send
+                          </button>
+                        </form>
+                      </div>
+                    </>
+                ) : null}
+              </div>
+            </div>
+
+          </div>
+        </main>
+      </>
   );
 };

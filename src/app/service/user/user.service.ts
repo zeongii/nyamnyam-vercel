@@ -44,15 +44,7 @@ export const modifyUser = async (user: User): Promise<User> => {
 };
 
 export const addUser = async (
-    username: string,
-    password: string,
-    nickname: string,
-    name: string,
-    age: number | string,
-    tel: string,
-    gender: string,
-    thumbnails: File[]
-): Promise<User> => {
+    username: string, password: string, nickname: string, name: string, age: number | string, tel: string, gender: string, thumbnails: File[], showModalAlert: (message: string) => void): Promise<User> => {
     const user: User = {
         id: '',
         username,
@@ -82,7 +74,7 @@ export const addUser = async (
 
 
 // 사용자 로그인 서비스
-export const authenticateUser = async (username: string, password: string): Promise<string> => {
+export const authenticateUser = async (username: string, password: string, showModalAlert: (message: string) => void): Promise<string> => {
     return await loginUser(username, password);
 };
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { addUser } from "@/app/service/user/user.service";
 import useModalAlert from "@/app/context/useModalAlert";
 import Modal from "@/app/components/Modal";
+import {User} from "@/app/model/user.model";
 
 export default function Register() {
     const router = useRouter();
@@ -46,7 +47,8 @@ export default function Register() {
 
         try {
             // addUser 호출 시 showModalAlert 추가
-            const newUser = await addUser(
+            let newUser: User;
+            [newUser] = await Promise.all([addUser(
                 username,
                 password,
                 nickname,
@@ -56,7 +58,7 @@ export default function Register() {
                 gender,
                 thumbnail ? [thumbnail] : [],
                 showModalAlert // 이 부분 추가
-            );
+            )]);
             console.log('User registered:', newUser);
             router.push("/user/login");
         } catch (error) {
