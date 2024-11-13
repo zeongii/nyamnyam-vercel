@@ -21,7 +21,7 @@ export default ({ user }: Partial<EditProfileProps>) => {
     const [age, setAge] = useState<number | string>(user?.age || '');
     const [tel, setTel] = useState(user?.tel || '');
     const [gender, setGender] = useState(user?.gender || '');
-    const [thumbnail, setThumbnail] = useState<File | null>(null);
+    // const [thumbnail, setThumbnail] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const isValidPhoneNumber = (phone: string) => {
@@ -59,14 +59,14 @@ export default ({ user }: Partial<EditProfileProps>) => {
             gender,
         };
 
-        if (thumbnail) {
+        /*if (thumbnail) {
             try {
                 const imgIds = await uploadThumbnailApi(user?.id || '', [thumbnail]);
                 updatedUser.imgId = imgIds.length > 0 ? imgIds[0].toString() : user?.imgId;
             } catch (error) {
                 console.error('썸네일 업로드 실패:', error);
             }
-        }
+        }*/
 
         try {
             // @ts-ignore
@@ -82,13 +82,13 @@ export default ({ user }: Partial<EditProfileProps>) => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             const file = event.target.files[0];
-            setThumbnail(file);
+            // setThumbnail(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
     const handleRemoveThumbnail = () => {
-        setThumbnail(null);
+        // setThumbnail(null);
         setPreviewUrl(null);
     };
 
@@ -186,7 +186,7 @@ export default ({ user }: Partial<EditProfileProps>) => {
                                     onChange={handleFileChange}
                                     style={{ display: 'none' }}
                                 />
-                                {thumbnail && <p>{thumbnail.name} 선택됨</p>}
+                                {/*{thumbnail && <p>{thumbnail.name} 선택됨</p>}*/}
                                 {previewUrl && (
                                     <div className="mt-3">
                                         <img src={previewUrl} alt="Thumbnail preview" style={{ width: '100px', height: '100px', borderRadius: '8px' }} />
