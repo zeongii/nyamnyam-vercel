@@ -186,19 +186,19 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
         } else if (modalType === "report") {
             // 신고 로직
             const selectedReason = reportReason;
-    
+
             if (!selectedReason) {
                 alert("신고 사유를 선택해주세요.");
                 return;
             }
-    
+
             const reportModel: ReportModel = {
                 userId: currentUserId,
                 postId: deletePostId,
                 reason: selectedReason,
                 entryDate: ''
             };
-    
+
             try {
                 await fetchReportRegister(reportModel);
                 setAlertOpen(false);
@@ -211,7 +211,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
         setModalType("");
     };
 
-    // 정렬 
+    // 정렬
     const sortedPosts = posts.slice().sort((a, b) => {
         switch (sort) {
             case 'date':
@@ -246,7 +246,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
         }));
     };
 
-    // 날짜 포맷 지정 
+    // 날짜 포맷 지정
     const formatDate = (dateString: string) => {
         if (!dateString) return '';
 
@@ -276,10 +276,8 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
 
             // 좋아요 추가 또는 취소에 따라 점수 업데이트 호출
             if (result.likeCountDelta > 0) {
-                // @ts-ignore
                 await increaseScore(postUserId); // 좋아요 추가 시
             } else {
-                // @ts-ignore
                 await decreaseScore(postUserId); // 좋아요 취소 시
             }
         }
@@ -287,7 +285,6 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
 
     const openUserModal = async (userId: string) => {
         try {
-            // @ts-ignore
             const user = await getUserById(userId);
             setSelectedUser(user);
             setIsUserOpen(true);
@@ -335,7 +332,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
                                         <div key={index} className="item flex items-center justify-between gap-1.5">
                                             <div className="flex items-center gap-1">
                                                 <div className="rounded-full border border-gray-300 bg-white px-3 py-1 text-gray-600 font-semibold shadow-sm hover:bg-gray-100 mb-1"
-                                                    style={{ whiteSpace: 'nowrap', display: 'inline-flex' }}>
+                                                     style={{ whiteSpace: 'nowrap', display: 'inline-flex' }}>
                                                     {tag}</div>
                                             </div>
                                             <div className="progress bg-line relative w-3/4 h-2">
@@ -566,7 +563,7 @@ const PostList: React.FC<Partial<PostListProps>> = ({ restaurantId }) => {
                         <div className='flex justify-center'>
                             {sortedPosts.length > 2 && (
                                 <div className="button-main custom-button mr-2 px-4 py-2 bg-green-500 text-white rounded"
-                                    onClick={handleViewMore}>
+                                     onClick={handleViewMore}>
                                     {visible >= sortedPosts.length ? "Hide Reviews" : "View More Reviews"}
                                 </div>
                             )}
