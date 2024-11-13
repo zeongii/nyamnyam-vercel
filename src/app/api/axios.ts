@@ -3,11 +3,11 @@
 import axios from "axios";
 
 export const instance  = axios.create ({
-    baseURL : "https://www.nyamnyam.kr"
+    baseURL : "https://abc.nyamnyam.kr"
 }); 
 
 export const instance1  = axios.create ({
-    baseURL : "http://www.nyamnyam.kr"
+    baseURL : "http://abc.nyamnyam.kr"
 }); 
 
 // JWT 토큰 헤더에 포함하기(리덕스 axios instance 설정)
