@@ -17,6 +17,7 @@ import {
     Title,
     Tooltip
 } from "chart.js";
+
 import styles from "src/css/mypage.module.css";
 import {Bar} from "react-chartjs-2";
 import ShowOpinion from "src/app/(page)/admin/showOpinion/page";
